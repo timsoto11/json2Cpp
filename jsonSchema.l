@@ -9,8 +9,8 @@ STRING     \"(\\.|[^\\"])*\"
 INTEGER     -?[0-9]+
 NUMBER     -?[0-9]+(\.[0-9]+)?([eE][-+]?[0-9]+)?
 BOOLEAN    (true|false)
-NULL    (null)
-KEYWORD    \"(type|properties|required|items|description|title|enum|default|format)\"
+VNULL    (null)
+KEYWORD    \"(type|properties|required|items|description|title|enum|default|format|$schema)\"
 
 %%
 
@@ -21,12 +21,12 @@ KEYWORD    \"(type|properties|required|items|description|title|enum|default|form
 ":"             { printf("COLON\n");return COLON; }
 ","             { printf("COMMA\n"); return COMMA; }
 
-{KEYWORD}       { printf("KEYWORD(%s)\n", yytext); return STRING; }
-{STRING}        { printf("STRING(%s)\n", yytext); return STRING; }
-{INTEGER}        { printf("INTEGER(%s)\n", yytext); return INTEGER; }
-{NUMBER}        { printf("NUMBER(%s)\n", yytext); return NUMBER; }
-{BOOLEAN}       { printf("BOOLEAN(%s)\n", yytext);  return BOOLEAN; }
-{NULL}       { printf("NULL(%s)\n", yytext); }
+{KEYWORD}       { printf("KEYWORD(%s)\n", yytext);  yylval.str = strdup(yytext); return STRING; }
+{STRING}        { printf("STRING(%s)\n", yytext);  yylval.str = strdup(yytext); return STRING;  }
+{INTEGER}       { printf("INTEGER(%s)\n", yytext);  yylval.str = strdup(yytext); return INTEGER; }
+{NUMBER}        { printf("NUMBER(%s)\n", yytext); yylval.str = strdup(yytext); return NUMBER; }
+{BOOLEAN}       { printf("BOOLEAN(%s)\n", yytext); yylval.str = strdup(yytext);  return BOOLEAN; }
+{VNULL}          { printf("NULL(%s)\n", yytext); yylval.str = strdup(yytext);  return VNULL;}
 
 [ \t\n\r]+      { /* Skip whitespace */ }
 

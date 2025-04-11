@@ -41,6 +41,7 @@ ASTNode *create_integer_node(char *value)
 
 ASTNode *create_boolean_node(char *value)
 {
+    printf("Creating bool node with value: %s\n", value);
     ASTNode *node = create_node(AST_NUMBER);
     node->string_value = strdup(value);
     return node;
@@ -48,13 +49,15 @@ ASTNode *create_boolean_node(char *value)
 
 ASTNode *create_null_node()
 {
+    printf("Creating null node with value: null\n");
     ASTNode *node = create_node(AST_NULL);
-    node->string_value = NULL;
+    node->string_value = strdup("null");
     return node;
 }
 
 ASTNode *create_pair_node(char *key, ASTNode *value)
 {
+    printf("Creating pair node with key: %s\n", key);
     ASTNode *node = create_node(AST_KEYWORD_PAIR);
     node->key = strdup(key);
     add_child(node, value);

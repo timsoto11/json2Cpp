@@ -26,17 +26,7 @@ int yylex();
 %%
 
 schema
-    : { $$ = NULL; }
-    | object                   { $$ = $1; root = $$; }
-    ;
-
-value
-    : STRING                   { $$ = create_string_node($1); free($1); }
-    | NUMBER                   { $$ = create_number_node($1); free($1); }
-    | INTEGER                  { $$ = create_integer_node($1); free($1); }
-    | BOOLEAN                  { $$ = create_integer_node($1); free($1); }
-    | object                   { $$ = $1; }
-    | array                    { $$ = $1; }
+    : object                   { $$ = $1; root = $$; }
     ;
 
 object
@@ -50,7 +40,7 @@ members
     ;
 
 pair
-    : STRING COLON value       { $$ = create_pair_node($1, $3); free($1); }
+    : STRING COLON value       { $$ = create_pair_node($1, $3); }
     ;
 
 array
@@ -63,6 +53,15 @@ elements
     | elements COMMA value     { $$ = $1; add_child($$, $3); }
     ;
 
+value
+    : STRING                   { $$ = create_string_node($1); free($1); }
+    | NUMBER                   { $$ = create_number_node($1); free($1); }
+    | INTEGER                  { $$ = create_integer_node($1); free($1); }
+    | BOOLEAN                  { $$ = create_integer_node($1); free($1); }
+    | VNULL                    { $$ = create_null_node(); free($1); }
+    | object                   { $$ = $1; }
+    | array                    { $$ = $1; }
+    ;
 
 
 %%
