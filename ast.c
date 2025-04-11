@@ -17,6 +17,7 @@ ASTNode *create_node(ASTNodeType type)
 
 ASTNode *create_string_node(char *value)
 {
+    printf("Creating string node with value: %s\n", value);
     ASTNode *node = create_node(AST_STRING);
     node->string_value = strdup(value);
     return node;
@@ -24,6 +25,7 @@ ASTNode *create_string_node(char *value)
 
 ASTNode *create_number_node(char *value)
 {
+    printf("Creating number node with value: %s\n", value);
     ASTNode *node = create_node(AST_NUMBER);
     node->string_value = strdup(value);
     return node;
@@ -31,6 +33,7 @@ ASTNode *create_number_node(char *value)
 
 ASTNode *create_integer_node(char *value)
 {
+    printf("Creating integer node with value: %s\n", value);
     ASTNode *node = create_node(AST_NUMBER);
     node->string_value = strdup(value);
     return node;
