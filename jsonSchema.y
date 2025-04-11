@@ -27,11 +27,12 @@ int yylex();
 
 schema
     : object                   { $$ = $1; root = $$; }
+    | { $$ = NULL; }
     ;
 
 object
     : LBRACE members RBRACE    { $$ = create_node(AST_OBJECT); for (int i = 0; i < $2->child_count; ++i) add_child($$, $2->children[i]); free($2->children); free($2); }
-    | LBRACE RBRACE            { $$ = create_null_node(); }
+    | LBRACE RBRACE            { }
     ;
 
 members

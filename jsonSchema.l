@@ -14,19 +14,19 @@ KEYWORD    \"(type|properties|required|items|description|title|enum|default|form
 
 %%
 
-"{"             { printf("LBRACE\n"); return LBRACE; }
-"}"             { printf("RBRACE\n"); return RBRACE; }
-"["             { printf("LBRACKET\n"); return LBRACKET; }
-"]"             { printf("RBRACKET\n"); return RBRACKET; }
-":"             { printf("COLON\n");return COLON; }
-","             { printf("COMMA\n"); return COMMA; }
+"{"             { return LBRACE; }
+"}"             { return RBRACE; }
+"["             { return LBRACKET; }
+"]"             { return RBRACKET; }
+":"             { return COLON; }
+","             { return COMMA; }
 
-{KEYWORD}       { printf("KEYWORD(%s)\n", yytext);  yylval.str = strdup(yytext); return STRING; }
-{STRING}        { printf("STRING(%s)\n", yytext);  yylval.str = strdup(yytext); return STRING;  }
-{INTEGER}       { printf("INTEGER(%s)\n", yytext);  yylval.str = strdup(yytext); return INTEGER; }
-{NUMBER}        { printf("NUMBER(%s)\n", yytext); yylval.str = strdup(yytext); return NUMBER; }
-{BOOLEAN}       { printf("BOOLEAN(%s)\n", yytext); yylval.str = strdup(yytext);  return BOOLEAN; }
-{VNULL}          { printf("NULL(%s)\n", yytext); yylval.str = strdup(yytext);  return VNULL;}
+{KEYWORD}       { yylval.str = strdup(yytext); return STRING; }
+{STRING}        { yylval.str = strdup(yytext); return STRING;  }
+{INTEGER}       { yylval.str = strdup(yytext); return INTEGER; }
+{NUMBER}        { yylval.str = strdup(yytext); return NUMBER; }
+{BOOLEAN}       { yylval.str = strdup(yytext);  return BOOLEAN; }
+{VNULL}         { yylval.str = strdup(yytext);  return VNULL;}
 
 [ \t\n\r]+      { /* Skip whitespace */ }
 
