@@ -4,10 +4,9 @@
 
 #include "ast.h"
 
-ASTNode *root;
+extern ASTNode *root;
 
 void yyerror(const char *s);
-int yylex();
 %}
 
 %union {
@@ -69,12 +68,4 @@ value
 
 void yyerror(const char *s) {
     fprintf(stderr, "Syntax error: %s\n", s);
-}
-
-int main() {
-    yyparse();
-    printf("✅ AST:\n");
-    print_ast(root, 0);
-    free_ast(root);
-    return 0;
 }

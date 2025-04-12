@@ -1,5 +1,6 @@
+CC = clang
 CPP = clang++
-CFLAGS =-Wall -O3 -Wall -Wextra -pedantic -fstack-protector-strong -Werror=format-security
+CFLAGS =
 
 %.o: %.c 
 	$(CC) -c -std=gnu11 -o $@ $< $(CFLAGS)
@@ -17,7 +18,7 @@ scanner.c: scanner.l
 parser.c: parser.y
 	bison -d --defines=parser.h --output=parser.c parser.y
 
-jsonSchema: parser.o scanner.o ast.o
+jsonSchema: parser.o scanner.o ast.o main.o
 	$(CPP) $^ -o $@
 
 clean:

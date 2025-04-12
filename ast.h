@@ -1,6 +1,10 @@
 #ifndef AST_H
 #define AST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum
 {
     AST_OBJECT,
@@ -32,5 +36,9 @@ ASTNode *create_null_node();
 ASTNode *create_pair_node(char *key, ASTNode *value);
 void print_ast(ASTNode *node, int indent);
 void free_ast(ASTNode *node);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
