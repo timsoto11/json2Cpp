@@ -6,9 +6,6 @@
 
 ASTNode *root;
 
-void yyerror(const char *s);
-int yylex();
-
 int main()
 {
     yyparse();

@@ -9,6 +9,16 @@ extern ASTNode *root;
 void yyerror(const char *s);
 %}
 
+%code requires {
+#ifdef __cplusplus
+extern "C" {
+#endif
+int yyparse(void);
+#ifdef __cplusplus
+}
+#endif
+}
+
 %union {
     char *str;
     ASTNode *node;
