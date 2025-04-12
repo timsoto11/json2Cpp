@@ -1,20 +1,24 @@
-
-CFLAGS =-Wall -O3 -Wno-unused-variable -Wno-unused-parameter -Wall -Wextra -pedantic -fstack-protector-strong -Werror=format-security
+CPP = clang++
+CFLAGS =-Wall -O3 -Wall -Wextra -pedantic -fstack-protector-strong -Werror=format-security
 
 %.o: %.c 
-	$(CC) -c -std=gnu11 -o $@ $< $(DEFINES) $(CFLAGS)
+	$(CC) -c -std=gnu11 -o $@ $< $(CFLAGS)
 
 %.o: %.cpp 
-	$(CPP) -c -std=c++17 -o $@ $< $(DEFINES) $(CFLAGS)
+	$(CPP) -c -std=c++17 -o $@ $< $(CFLAGS)
 
-scanner:
+all: jsonSchema
+
+parser.o: scanner.c
+
+scanner.c: scanner.l
 	flex --outfile=scanner.c scanner.l
 
-parser: 
+parser.c: parser.y
 	bison -d --defines=parser.h --output=parser.c parser.y
 
-jsonSchema:  scanner parser
-	gcc parser.c scanner.c ast.c -lfl -o $@
+jsonSchema: parser.o scanner.o ast.o
+	$(CPP) $^ -o $@
 
 clean:
-	rm -f jsonSchema.tab.c jsonSchema.tab.h lex.yy.c jsonSchema testOutput.txt
+	rm -f *.o parser.c parser.h scanner.c jsonSchema 

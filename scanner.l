@@ -1,6 +1,6 @@
 %{
 #include "ast.h"
-#include "jsonSchema.tab.h"
+#include "parser.h"
 %}
 
 %option noyywrap

@@ -4,3 +4,4 @@ jsonSchema
 parser.c
 parser.h
 scanner.c
+*.o
