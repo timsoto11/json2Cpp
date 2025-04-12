@@ -1,6 +1,6 @@
 jsonScanner
 jsonSchema
 .vscode/*
-jsonSchema.tab.c
-jsonSchema.tab.h
-lex.yy.c
+parser.c
+parser.h
+scanner.c
