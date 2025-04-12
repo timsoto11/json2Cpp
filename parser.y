@@ -1,3 +1,4 @@
+// This %{ %} means this code will be in the source code
 %{
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +10,7 @@ extern ASTNode *root;
 void yyerror(const char *s);
 %}
 
+// This %code requires{ } means this code will be in both the header and source code
 %code requires {
 #ifdef __cplusplus
 extern "C" {
