@@ -53,6 +53,7 @@ members
 
 pair
     : STRING COLON value       { $$ = create_pair_node($1, $3); }
+    | KEYWORD COLON value      { $$ = create_keyword_pair_node($1, $3); }
     ;
 
 array

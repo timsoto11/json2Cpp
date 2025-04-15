@@ -52,6 +52,14 @@ ASTNode *create_null_node()
 
 ASTNode *create_pair_node(char *key, ASTNode *value)
 {
+    ASTNode *node = create_node(AST_PAIR);
+    node->key = strdup(key);
+    add_child(node, value);
+    return node;
+}
+
+ASTNode *create_keyword_pair_node(char *key, ASTNode *value)
+{
     ASTNode *node = create_node(AST_KEYWORD_PAIR);
     node->key = strdup(key);
     add_child(node, value);
@@ -82,7 +90,19 @@ void print_ast(ASTNode *node, int indent)
         printf("Number: %s\n", node->string_value);
         return;
     case AST_KEYWORD_PAIR:
+        printf("Keyword Pair: %s\n", node->key);
+        break;
+    case AST_PAIR:
         printf("Pair: %s\n", node->key);
+        break;
+    case AST_BOOLEAN:
+        printf("Boolean: %s\n", node->string_value);
+        break;
+    case AST_INTEGER:
+        printf("Integer: %s\n", node->string_value);
+        break;
+    case AST_NULL:
+        printf("NULL: %s\n", node->string_value);
         break;
     }
     for (int i = 0; i < node->child_count; ++i)

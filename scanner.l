@@ -21,7 +21,7 @@ KEYWORD    \"(type|properties|required|items|description|title|enum|default|form
 ":"             { return COLON; }
 ","             { return COMMA; }
 
-{KEYWORD}       { yylval.str = strdup(yytext); return STRING; }
+{KEYWORD}       { yylval.str = strdup(yytext); return KEYWORD; }
 {STRING}        { yylval.str = strdup(yytext); return STRING;  }
 {INTEGER}       { yylval.str = strdup(yytext); return INTEGER; }
 {NUMBER}        { yylval.str = strdup(yytext); return NUMBER; }
