@@ -18,7 +18,7 @@ scanner.c: scanner.l
 parser.c: parser.y
 	bison -d --defines=parser.h --output=parser.c parser.y
 
-jsonSchema: parser.o scanner.o ast.o main.o
+jsonSchema: parser.o scanner.o ast.o cppGen.o main.o
 	$(CPP) $^ -o $@
 
 clean:
