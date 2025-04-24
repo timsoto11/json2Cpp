@@ -4,6 +4,8 @@
 
 #include "cppGen.hpp"
 
+using namespace cpp;
+
 static void generate(ASTNode *node, uint32_t level);
 static void generateStruct(ASTNode *node, std::string structName);
 std::string map_type(const std::string &type);
@@ -42,16 +44,31 @@ void printNode(ASTNode *node, int level)
     }
 }
 
-void cpp::generateCpp(ASTNode *node)
+cpp::generator::generator()
 {
-    static std::string name;
+    const std::string name = "violationSettings";
     // print(node, 0);
     for (int i = 0; i < node->child_count; i++)
     {
         // printNode(node->children[i], 0);
         ASTNode *pair = node->children[i];
-        // if (!pair || pair->type == AST_KEYWORD_PAIR) { continue; }
-        if (!pair || pair->type == AST_PAIR) { name = pair->key; }
+
+        if (std::string(pair->key).compare("\"properties\"") != 0) { continue; }
+        for (int j = 0; j < pair->child_count; j++)
+        {
+            generateStruct(node, name);
+        }
+    }
+}
+
+generator::generator(ASTNode *node)
+{
+    const std::string name = "violationSettings";
+    // print(node, 0);
+    for (int i = 0; i < node->child_count; i++)
+    {
+        // printNode(node->children[i], 0);
+        ASTNode *pair = node->children[i];
 
         if (std::string(pair->key).compare("\"properties\"") != 0) { continue; }
         for (int j = 0; j < pair->child_count; j++)

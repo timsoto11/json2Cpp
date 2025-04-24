@@ -11,9 +11,9 @@ int main()
 {
     yyparse();
     printf("✅ AST:\n");
-    // print_ast(root, 0);
+    print_ast(root, 0);
 
-    cpp::generateCpp(root);
+    cpp::generator a(root);
 
     free_ast(root);
     return 0;
