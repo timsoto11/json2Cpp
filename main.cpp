@@ -12,8 +12,10 @@ int main()
     yyparse();
     printf("✅ AST:\n");
     // print_ast(root, 0);
+    // printf("\n");
 
-    cpp::generateCpp(root);
+    cpp::cppGenerator gen(root);
+    gen.generate();
 
     free_ast(root);
     return 0;

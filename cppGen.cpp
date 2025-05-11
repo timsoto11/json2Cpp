@@ -4,6 +4,8 @@
 
 #include "cppGen.hpp"
 
+using namespace cpp;
+
 static void generate(ASTNode *node, uint32_t level);
 static void generateStruct(ASTNode *node, std::string structName);
 std::string map_type(const std::string &type);
@@ -24,9 +26,6 @@ void printNode(ASTNode *node, int level)
     case AST_NUMBER:
         printf("Number: %s\n", node->string_value);
         return;
-    case AST_KEYWORD_PAIR:
-        printf("Keyword Pair: %s\n", node->key);
-        break;
     case AST_PAIR:
         printf("Pair: %s\n", node->key);
         break;
@@ -42,15 +41,20 @@ void printNode(ASTNode *node, int level)
     }
 }
 
-void cpp::generateCpp(ASTNode *node)
+cppGenerator::cppGenerator(ASTNode *node) : node(node)
+{
+}
+
+cppGenerator::~cppGenerator()
+{
+}
+
+void cppGenerator::generate()
 {
     static std::string name;
-    // print(node, 0);
     for (int i = 0; i < node->child_count; i++)
     {
-        // printNode(node->children[i], 0);
         ASTNode *pair = node->children[i];
-        // if (!pair || pair->type == AST_KEYWORD_PAIR) { continue; }
         if (!pair || pair->type == AST_PAIR) { name = pair->key; }
 
         if (std::string(pair->key).compare("\"properties\"") != 0) { continue; }
@@ -64,7 +68,7 @@ void cpp::generateCpp(ASTNode *node)
 std::string map_type(const std::string &type)
 {
     if (type == "\"string\"") return "std::string";
-    if (type == "\"number\"" || type == "\"integer\"") return "double"; // TODO: determine based off of minimum or maximun if provided
+    if (type == "\"number\"" || type == "\"integer\"") return "double"; // TODO: determine type based off of minimum or maximun if provided
     if (type == "\"boolean\"") return "bool";
     // TODO: Support vectors later, maybe even std::array
     return "/* unknown */";
@@ -72,40 +76,47 @@ std::string map_type(const std::string &type)
 
 void generateStruct(ASTNode *node, std::string structName)
 {
-    std::cout << "struct " << structName << " {\n";
-
-    for (int i = 0; i < node->child_count; ++i)
+    try
     {
-        ASTNode *pair = node->children[i];
-        if (!pair || pair->type != AST_KEYWORD_PAIR) { continue; }
+        std::cout << "struct " << structName << " {\n";
 
-        std::string key = pair->key;
-
-        if (key.compare("\"properties\"") == 0)
+        for (int i = 0; i < node->child_count; ++i)
         {
-            ASTNode *properties = pair->children[0]; // value node (object)
-            for (int j = 0; j < properties->child_count; ++j)
+            ASTNode *pair = node->children[i];
+            // if (!pair || pair->type != AST_KEYWORD_PAIR) { continue; }
+
+            std::string key = pair->key;
+
+            if (key.compare("\"properties\"") == 0)
             {
-                ASTNode *prop_pair = properties->children[j];
-                std::string prop_name = prop_pair->key;
-
-                ASTNode *prop_object = prop_pair->children[0];
-                std::string typeStr = "/* unknown */";
-
-                for (int k = 0; k < prop_object->child_count; ++k)
+                ASTNode *properties = pair->children[0]; // value node (object)
+                for (int j = 0; j < properties->child_count; ++j)
                 {
-                    ASTNode *type_pair = prop_object->children[k];
-                    if (std::string(type_pair->key).compare("\"type\"") == 0)
-                    {
-                        ASTNode *type_node = type_pair->children[0];
-                        typeStr = map_type(type_node->string_value);
-                    }
-                }
+                    ASTNode *prop_pair = properties->children[j];
+                    std::string prop_name = prop_pair->key;
 
-                std::cout << "    " << typeStr << " " << prop_name.substr(1, prop_name.length() - 2) << ";\n"; // remove quotes
+                    ASTNode *prop_object = prop_pair->children[0];
+                    std::string typeStr = "/* unknown */";
+
+                    for (int k = 0; k < prop_object->child_count; ++k)
+                    {
+                        ASTNode *type_pair = prop_object->children[k];
+                        if (std::string(type_pair->key).compare("\"type\"") == 0)
+                        {
+                            // ASTNode *type_node = type_pair->children[0];
+                            // typeStr = map_type(type_node->string_value);
+                        }
+                    }
+
+                    std::cout << "    " << typeStr << " " << prop_name.substr(1, prop_name.length() - 2) << ";\n"; // remove quotes
+                }
             }
         }
-    }
 
-    std::cout << "};\n";
+        std::cout << "};\n";
+    }
+    catch (...)
+    {
+        std::cout << "Caught\n";
+    }
 }
