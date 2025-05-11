@@ -10,12 +10,10 @@ ASTNode *root;
 int main()
 {
     yyparse();
-    printf("✅ AST:\n");
+    // printf("✅ AST:\n");
     // print_ast(root, 0);
-    // printf("\n");
 
-    cpp::cppGenerator gen(root);
-    gen.generate();
+    cpp::generator a(root);
 
     free_ast(root);
     return 0;

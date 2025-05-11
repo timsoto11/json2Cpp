@@ -41,21 +41,30 @@ void printNode(ASTNode *node, int level)
     }
 }
 
-cppGenerator::cppGenerator(ASTNode *node) : node(node)
+cpp::generator::generator()
 {
+    const std::string name = "violationSettings";
+    // print(node, 0);
+    for (int i = 0; i < node->child_count; i++)
+    {
+        // printNode(node->children[i], 0);
+        ASTNode *pair = node->children[i];
+
+        if (std::string(pair->key).compare("\"properties\"") != 0) { continue; }
+        for (int j = 0; j < pair->child_count; j++)
+        {
+            generateStruct(node, name);
+        }
+    }
 }
 
-cppGenerator::~cppGenerator()
+generator::generator(ASTNode *node)
 {
-}
-
-void cppGenerator::generate()
-{
-    static std::string name;
+    const std::string name = "violationSettings";
+    // print(node, 0);
     for (int i = 0; i < node->child_count; i++)
     {
         ASTNode *pair = node->children[i];
-        if (!pair || pair->type == AST_PAIR) { name = pair->key; }
 
         if (std::string(pair->key).compare("\"properties\"") != 0) { continue; }
         for (int j = 0; j < pair->child_count; j++)

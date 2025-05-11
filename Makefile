@@ -1,5 +1,5 @@
-CC = clang
-CPP = clang++
+CC = gcc
+CPP = g++
 CFLAGS =
 
 %.o: %.c 
