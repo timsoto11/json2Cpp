@@ -1,3 +1,4 @@
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -74,13 +75,44 @@ generator::generator(ASTNode *node)
     }
 }
 
-std::string map_type(const std::string &type)
+std::string map_type(ASTNode *node)
 {
-    if (type == "\"string\"") return "std::string";
-    if (type == "\"number\"" || type == "\"integer\"") return "double"; // TODO: determine type based off of minimum or maximun if provided
-    if (type == "\"boolean\"") return "bool";
-    // TODO: Support vectors later, maybe even std::array
-    return "/* unknown */";
+    switch (node->type)
+    {
+    case AST_OBJECT:
+        return "/* unknownObject */";
+        break;
+    case AST_ARRAY:
+        return "/* unknownArray */";
+        break;
+    case AST_STRING:
+        if (node->string_value == "\"string\"") { return "std::string"; }
+        if (std::memcmp(node->string_value, "\"string\"", sizeof("\"string\"")) == 0) { return "std::string"; }
+        if (std::memcmp(node->string_value, "\"number\"", sizeof("\"number\"")) == 0) { return "double"; } // TODO: determine type based off of minimum or maximun if provided
+        if (std::memcmp(node->string_value, "\"boolean\"", sizeof("\"boolean\"")) == 0) { return "std::string"; }
+        // TODO: Support vectors later, maybe even std::array
+        return "/* unknownString */";
+        break;
+    case AST_NUMBER:
+        return "/* unknownNumber */";
+        break;
+    case AST_INTEGER:
+        return "/* unknownInteger */";
+        break;
+    case AST_BOOLEAN:
+        return "/* unknownBoolean */";
+        break;
+    case AST_NULL:
+        return "/* unknownNull */";
+        break;
+    case AST_PAIR:
+        return "/* unknownPair */";
+        break;
+    default:
+        return "/* unknownType */";
+    }
+
+    return "/* unknownType */"; // unreachable
 }
 
 void generateStruct(ASTNode *node, std::string structName)
@@ -92,7 +124,6 @@ void generateStruct(ASTNode *node, std::string structName)
         for (int i = 0; i < node->child_count; ++i)
         {
             ASTNode *pair = node->children[i];
-            // if (!pair || pair->type != AST_KEYWORD_PAIR) { continue; }
 
             std::string key = pair->key;
 
@@ -112,8 +143,7 @@ void generateStruct(ASTNode *node, std::string structName)
                         ASTNode *type_pair = prop_object->children[k];
                         if (std::string(type_pair->key).compare("\"type\"") == 0)
                         {
-                            // ASTNode *type_node = type_pair->children[0];
-                            // typeStr = map_type(type_node->string_value);
+                            typeStr = map_type(type_pair->children[0]);
                         }
                     }
 
