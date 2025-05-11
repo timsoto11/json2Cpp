@@ -10,7 +10,6 @@ INTEGER     -?[0-9]+
 NUMBER     -?[0-9]+(\.[0-9]+)?([eE][-+]?[0-9]+)?
 BOOLEAN    (true|false)
 VNULL    (null)
-KEYWORD    \"(type|properties|required|items|description|title|enum|default|format|$schema)\"
 
 %%
 
@@ -21,7 +20,6 @@ KEYWORD    \"(type|properties|required|items|description|title|enum|default|form
 ":"             { return COLON; }
 ","             { return COMMA; }
 
-{KEYWORD}       { yylval.str = strdup(yytext); return KEYWORD; }
 {STRING}        { yylval.str = strdup(yytext); return STRING;  }
 {INTEGER}       { yylval.str = strdup(yytext); return INTEGER; }
 {NUMBER}        { yylval.str = strdup(yytext); return NUMBER; }

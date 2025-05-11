@@ -14,7 +14,6 @@ typedef enum
     AST_INTEGER,
     AST_BOOLEAN,
     AST_NULL,
-    AST_KEYWORD_PAIR,
     AST_PAIR
 } ASTNodeType;
 
@@ -35,7 +34,6 @@ ASTNode *create_integer_node(char *value);
 ASTNode *create_boolean_node(char *value);
 ASTNode *create_null_node();
 ASTNode *create_pair_node(char *key, ASTNode *value);
-ASTNode *create_keyword_pair_node(char *key, ASTNode *value);
 void print_ast(ASTNode *node, int indent);
 void free_ast(ASTNode *node);
 

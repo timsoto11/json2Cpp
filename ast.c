@@ -58,14 +58,6 @@ ASTNode *create_pair_node(char *key, ASTNode *value)
     return node;
 }
 
-ASTNode *create_keyword_pair_node(char *key, ASTNode *value)
-{
-    ASTNode *node = create_node(AST_KEYWORD_PAIR);
-    node->key = strdup(key);
-    add_child(node, value);
-    return node;
-}
-
 void add_child(ASTNode *parent, ASTNode *child)
 {
     parent->children = realloc(parent->children, sizeof(ASTNode *) * (parent->child_count + 1));
@@ -89,9 +81,6 @@ void print_ast(ASTNode *node, int indent)
     case AST_NUMBER:
         printf("Number: %s\n", node->string_value);
         return;
-    case AST_KEYWORD_PAIR:
-        printf("Keyword Pair: %s\n", node->key);
-        break;
     case AST_PAIR:
         printf("Pair: %s\n", node->key);
         break;

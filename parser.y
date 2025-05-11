@@ -28,7 +28,6 @@ int yyparse(void);
 
 %token LBRACE RBRACE LBRACKET RBRACKET COLON COMMA
 %token <str> STRING NUMBER INTEGER BOOLEAN VNULL
-%token <str> KEYWORD
 
 %type <node> schema object members pair value array elements
 
@@ -53,7 +52,6 @@ members
 
 pair
     : STRING COLON value       { $$ = create_pair_node($1, $3); }
-    | KEYWORD COLON value      { $$ = create_keyword_pair_node($1, $3); }
     ;
 
 array
