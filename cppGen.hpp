@@ -84,6 +84,8 @@ private:
     ASTNode *node;
     std::vector<std::string> enumsStrings;
     std::vector<std::string> structStrings;
+
+    void generateStruct(ASTNode *node, std::string structName);
 };
 }
 
