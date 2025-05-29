@@ -1,6 +1,6 @@
 CC = gcc
 CPP = g++
-CFLAGS =
+CFLAGS = -I./ast/
 
 %.o: %.c 
 	$(CC) -c -std=gnu11 -o $@ $< $(CFLAGS)
@@ -10,16 +10,16 @@ CFLAGS =
 
 all: jsonSchema
 
-parser.o: scanner.c
+parser.o: ast/scanner.c ast/parser.c
 
-scanner.c: scanner.l
-	flex --outfile=scanner.c scanner.l
+ast/scanner.c: ast/scanner.l
+	flex --outfile=ast/scanner.c ast/scanner.l
 
-parser.c: parser.y
-	bison -d --defines=parser.h --output=parser.c parser.y
+ast/parser.c: ast/parser.y
+	bison -d --defines=ast/parser.h --output=ast/parser.c ast/parser.y
 
-jsonSchema: parser.o scanner.o ast.o cppGen.o main.o
+jsonSchema: ast/parser.o ast/scanner.o ast/ast.o cppGen.o main.o
 	$(CPP) $^ -o $@
 
 clean:
-	rm -f *.o parser.c parser.h scanner.c jsonSchema 
+	rm -f *.o **/*.o ast/parser.c ast/parser.h scanner.c jsonSchema 
