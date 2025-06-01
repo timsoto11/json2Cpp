@@ -5,6 +5,8 @@
 #include <cctype>
 #include <cstdint>
 #include <iostream>
+#include <limits>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -18,10 +20,13 @@ public:
     enum CPP_TYPES : uint8_t
     {
         UNKNOWN,
+        OBJECT,
         STRING,
         ENUM,
         INTEGER,
-        NUMBER
+        NUMBER,
+        BOOL,
+        ARRAY
     };
 
     CppType() = default;
@@ -30,9 +35,12 @@ public:
     CppType(const std::string &s)
     {
         if (s == "string") { value = CppType::STRING; }
+        else if (s == "object") { value = CppType::OBJECT; }
         else if (s == "integer") { value = CppType::INTEGER; }
         else if (s == "enum") { value = CppType::ENUM; }
         else if (s == "number") { value = CppType::NUMBER; }
+        else if (s == "boolean") { value = CppType::BOOL; }
+        else if (s == "array") { value = CppType::ARRAY; }
         else { value = CppType::UNKNOWN; }
     }
 
@@ -57,12 +65,18 @@ public:
             return "Unknown";
         case STRING:
             return "std::string";
+        case OBJECT:
+            return "struct";
         case ENUM:
             return "enum";
         case INTEGER:
             return "int";
         case NUMBER:
             return "double";
+        case BOOL:
+            return "bool";
+        case ARRAY:
+            return "std::vector";
         }
         return ""; // unreachable
     }
@@ -71,21 +85,45 @@ private:
     CPP_TYPES value = UNKNOWN;
 };
 
+class CSTNode
+{
+public:
+    CppType type = CppType::UNKNOWN;
+    std::string name;
+    bool hasEnum = false;
+    CSTNode *parent;
+    std::vector<std::unique_ptr<CSTNode>> children; // For arrays/objects
+};
+
+class integer : public CSTNode
+{
+    int64_t minimum = std::numeric_limits<int64_t>::min();
+    int64_t maximum = std::numeric_limits<int64_t>::max();
+};
+
+class string : public CSTNode
+{
+    std::string pattern;
+};
+
+class array : public CSTNode
+{
+    uint64_t minItems = std::numeric_limits<uint64_t>::min();
+    uint64_t maxItems = std::numeric_limits<uint64_t>::max();
+    CSTNode *objects;
+};
+
 class generator
 {
 public:
-    generator();
     generator(ASTNode *node);
-
-    void generateCpp();
-    static void generateCpp(ASTNode *node);
+    void generateStruct(ASTNode *node, std::unique_ptr<CSTNode> &cstNode);
+    void print_cst(const CSTNode *const node, int indent);
 
 private:
     ASTNode *node;
     std::vector<std::string> enumsStrings;
     std::vector<std::string> structStrings;
-
-    void generateStruct(ASTNode *node, std::string structName);
 };
 }
 
