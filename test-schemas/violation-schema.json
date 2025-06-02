@@ -1346,7 +1346,7 @@
                                 }
                             ],
                             "default": "43",
-                            "comment": "0d43: approaching mode 0d45: Receding mode"
+                            "$comment": "0d43: approaching mode 0d45: Receding mode"
                         },
                         "stopbar_mid_lane_distance": {
                             "title": "Stopbar Distance",
@@ -1753,10 +1753,8 @@
         },
         "databar": {
             "title": "Databar",
-            "type": [
-                "object",
-                "null"
-            ],
+            "type":  "object",
+
             "additionalProperties": false,
             "properties": {
                 "font": {
@@ -2005,10 +2003,7 @@
         },
         "incident_rois": {
             "title": "Incident Rois",
-            "type": [
-                "array",
-                "null"
-            ],
+            "type": "array",
             "minItems": 0,
             "maxItems": 255,
             "items": [
@@ -2683,9 +2678,7 @@
                         "regions": {
                             "title": "Crosswalk Rejection ROIs",
                             "description": "Settings for crosswalk rejection ROIs",
-                            "type": [
-                                "array"
-                            ],
+                            "type": "array",
                             "minItems": 0,
                             "maxItems": 255,
                             "items": [
@@ -2846,9 +2839,7 @@
                         "regions": {
                             "title": "Intelligent ROI regions",
                             "description": "Settings for Intelligent ROI regions",
-                            "type": [
-                                "array"
-                            ],
+                            "type": "array",
                             "minItems": 0,
                             "maxItems": 255,
                             "items": [
