@@ -43,8 +43,8 @@ void generator::generateStruct(ASTNode *node, std::unique_ptr<CSTNode> &parent)
     }
     case AST_ARRAY:
     {
-        printf("Array\n");
-        return;
+        printf("AST_ARRAY\n");
+        break;
     }
     case AST_STRING:
     {
@@ -66,13 +66,18 @@ void generator::generateStruct(ASTNode *node, std::unique_ptr<CSTNode> &parent)
             return;
         }
         else if (std::string(node->key).compare("\"title\"") == 0) { return; }
+        else if (std::string(node->key).compare("\"$comment\"") == 0) { return; }
         else if (std::string(node->key).compare("\"default\"") == 0) { return; }
         else if (std::string(node->key).compare("\"description\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"oneOf\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"minimum\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"maximum\"") == 0) { return; }
+        else if (std::string(node->key).compare("\"items\"") == 0) { break; }
+        else if (std::string(node->key).compare("\"pattern\"") == 0) { return; }
+        else if (std::string(node->key).compare("\"oneOf\"") == 0) { return; }    // TODO: Build enum
+        else if (std::string(node->key).compare("\"minimum\"") == 0) { return; }  // TODO: Modify parent
+        else if (std::string(node->key).compare("\"maximum\"") == 0) { return; }  // TODO: Modify parent
+        else if (std::string(node->key).compare("\"minItems\"") == 0) { return; } // TODO: Modify parent
+        else if (std::string(node->key).compare("\"maxItems\"") == 0) { return; } // TODO: Modify parent
         else if (std::string(node->key).compare("\"description\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"type\"") == 0)
+        else if (std::string(node->key).compare("\"type\"") == 0) // TODO: Handle multiple types ex. "type": ["array", "null"]
         {
 
             parent->type = CppType(std::string(node->children[0]->string_value).substr(1, strlen(node->children[0]->string_value) - 2));
@@ -112,7 +117,9 @@ void generator::generateStruct(ASTNode *node, std::unique_ptr<CSTNode> &parent)
         {
             auto child = std::make_unique<CSTNode>();
             child->parent = parent.get();
-            child->name = std::string(node->key).substr(1, strlen(node->key) - 2);
+            if (std::string(node->key).compare("\"items\"") == 0) { child->name = parent->name + "Struct"; }
+            else { child->name = std::string(node->key).substr(1, strlen(node->key) - 2); }
+
             // std::cout << child->name << " is a child of " << parent->name << '\n';
             parent->children.push_back(std::move(child));
             generateStruct(node->children[i], parent->children.back());
