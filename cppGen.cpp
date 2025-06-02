@@ -79,9 +79,11 @@ void generator::generateStruct(ASTNode *node, std::unique_ptr<CSTNode> &parent)
         else if (std::string(node->key).compare("\"description\"") == 0) { return; }
         else if (std::string(node->key).compare("\"type\"") == 0) // TODO: Handle multiple types ex. "type": ["array", "null"]
         {
-
-            parent->type = CppType(std::string(node->children[0]->string_value).substr(1, strlen(node->children[0]->string_value) - 2));
-            return;
+            if (node->children[0]->type == AST_STRING)
+            {
+                parent->type = CppType(std::string(node->children[0]->string_value).substr(1, strlen(node->children[0]->string_value) - 2));
+                return;
+            }
         }
         else if (std::string(node->key).compare("\"properties\"") == 0) { break; }
         else if (std::string(node->key).compare("\"additionalProperties\"") == 0) { return; }
