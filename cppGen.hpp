@@ -93,31 +93,15 @@ public:
     bool hasEnum = false;
     CSTNode *parent;
     std::vector<std::unique_ptr<CSTNode>> children; // For arrays/objects
-};
-
-class integer : public CSTNode
-{
     int64_t minimum = std::numeric_limits<int64_t>::min();
     int64_t maximum = std::numeric_limits<int64_t>::max();
-};
-
-class string : public CSTNode
-{
-    std::string pattern;
-};
-
-class array : public CSTNode
-{
-    uint64_t minItems = std::numeric_limits<uint64_t>::min();
-    uint64_t maxItems = std::numeric_limits<uint64_t>::max();
-    CSTNode *objects;
 };
 
 class generator
 {
 public:
     generator(ASTNode *node);
-    void generateStruct(ASTNode *node, std::unique_ptr<CSTNode> &cstNode);
+    void generateStruct(ASTNode *node, CSTNode &cstNode);
     void print_cst(const CSTNode *const node, int indent);
 
 private:
