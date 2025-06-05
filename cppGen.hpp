@@ -101,13 +101,15 @@ class generator
 {
 public:
     generator(ASTNode *node);
-    void generateStruct(ASTNode *node, CSTNode &cstNode);
+    void generateCST(ASTNode *node, CSTNode &cstNode);
     void print_cst(const CSTNode *const node, int indent);
 
 private:
     ASTNode *node;
     std::vector<std::string> enumsStrings;
     std::vector<std::string> structStrings;
+
+    void generateStruct(CSTNode &node);
 };
 }
 
