@@ -1,6 +1,7 @@
 #include <cstring>
-#include <iostream>
-#include <memory>
+#include <fstream>  // std::ofstream
+#include <iostream> // std::iostream
+#include <memory>   // unique and make_unique
 #include <string>
 #include <vector>
 
@@ -8,16 +9,51 @@
 
 using namespace cpp;
 
+std::string underscoreToCamelCase(const std::string &str)
+{
+    std::string result;
+    bool nextUpper = true;
+
+    for (char ch : str)
+    {
+        if (ch == '_') { nextUpper = true; }
+        else
+        {
+            if (nextUpper)
+            {
+                result += std::toupper(ch);
+                nextUpper = false;
+            }
+            else { result += ch; }
+        }
+    }
+
+    return result;
+}
+
 generator::generator(ASTNode *node)
 {
     auto root = std::make_unique<CSTNode>();
     root->parent = nullptr;
     root->name = "violationSettings";
 
-    generateStruct(node, *root);
+    generateCST(node, *root);
 
     std::cout << "Generated Tree:\n";
-    print_cst(root.get(), 0);
+    // print_cst(root.get(), 0);
+    // std::cout << "\n\n";
+    generateStruct(*root);
+
+    std::ofstream fs("violationSettings.hpp");
+
+    fs << "#include <string>\n";
+    fs << "#include <vector>\n";
+    fs << '\n';
+
+    for (const auto &str : structStrings)
+    {
+        fs << str << '\n';
+    }
 }
 
 void generator::print_cst(const CSTNode *const node, int indent)
@@ -32,7 +68,35 @@ void generator::print_cst(const CSTNode *const node, int indent)
     }
 }
 
-void generator::generateStruct(ASTNode *node, CSTNode &parent)
+void cpp::generator::generateStruct(CSTNode &node)
+{
+    std::string structStr;
+
+    structStr += "struct " + underscoreToCamelCase(node.name) + " {\n";
+    for (const auto &child : node.children)
+    {
+        if (child->type == CppType::OBJECT)
+        {
+            structStr += "\t" + underscoreToCamelCase(child->name) + ' ' + child->name + ";\n";
+            generateStruct(*child);
+            // generate Struct for this
+        }
+        else if (child->type == CppType::ARRAY)
+        {
+            structStr += "\t" + child->type.toString() + '<' + underscoreToCamelCase(child->name) + "> " + child->name + ";\n";
+            generateStruct(*child);
+            // generate Struct for this
+        }
+        else
+        {
+            structStr += "\t" + child->type.toString() + ' ' + child->name + ";\n";
+        }
+    }
+    structStr += "};\n";
+    structStrings.push_back(structStr);
+}
+
+void generator::generateCST(ASTNode *node, CSTNode &parent)
 {
     switch (node->type)
     {
@@ -43,7 +107,7 @@ void generator::generateStruct(ASTNode *node, CSTNode &parent)
     }
     case AST_ARRAY:
     {
-        printf("AST_ARRAY\n");
+        // printf("AST_ARRAY\n");
         break;
     }
     case AST_STRING:
@@ -155,11 +219,11 @@ void generator::generateStruct(ASTNode *node, CSTNode &parent)
 
             // std::cout << child->name << " is a child of " << parent->name << '\n';
             parent.children.push_back(std::move(child));
-            generateStruct(node->children[i], *(parent.children.back()));
+            generateCST(node->children[i], *(parent.children.back()));
         }
         else
         {
-            generateStruct(node->children[i], parent);
+            generateCST(node->children[i], parent);
         }
     }
 }
