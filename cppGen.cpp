@@ -84,7 +84,7 @@ void cpp::generator::generateStruct(CSTNode &node)
         else if (child->type == CppType::ARRAY)
         {
             structStr += "\t" + child->type.toString() + '<' + underscoreToCamelCase(child->name) + "> " + child->name + ";\n";
-            generateStruct(*child);
+            generateStruct(*(child->children[0]));
             // generate Struct for this
         }
         else
@@ -214,7 +214,7 @@ void generator::generateCST(ASTNode *node, CSTNode &parent)
         {
             auto child = std::make_unique<CSTNode>();
             child->parent = &parent;
-            if (std::string(node->key).compare("\"items\"") == 0) { child->name = parent.name + "Struct"; }
+            if (std::string(node->key).compare("\"items\"") == 0) { child->name = parent.name; }
             else { child->name = std::string(node->key).substr(1, strlen(node->key) - 2); }
 
             // std::cout << child->name << " is a child of " << parent->name << '\n';
