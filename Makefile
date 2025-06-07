@@ -1,6 +1,6 @@
 CC = gcc
 CPP = g++
-CFLAGS = -I./ast/
+CFLAGS = -I./ast/ -I./jst/
 
 %.o: %.c 
 	$(CC) -c -std=gnu11 -o $@ $< $(CFLAGS)
@@ -18,7 +18,7 @@ ast/scanner.c: ast/scanner.l
 ast/parser.c: ast/parser.y
 	bison -d --defines=ast/parser.h --output=ast/parser.c ast/parser.y
 
-jsonSchema: ast/parser.o ast/scanner.o ast/ast.o cppGen.o main.o
+jsonSchema: ast/parser.o ast/scanner.o ast/ast.o jst/generationUtils.o jst/JST.o cppGen.o main.o
 	$(CPP) $^ -o $@
 
 clean:
