@@ -59,3 +59,27 @@ void cpp::generator::generateStruct(JSTNode &node)
     structStr += "};\n";
     structStrings.push_back(structStr);
 }
+
+std::string generator::toString(const JsonType &value)
+{
+    switch (value)
+    {
+    case JsonType::UNKNOWN:
+        return "Unknown";
+    case JsonType::STRING:
+        return "std::string";
+    case JsonType::OBJECT:
+        return "struct";
+    case JsonType::ENUM:
+        return "enum";
+    case JsonType::INTEGER:
+        return "int";
+    case JsonType::NUMBER:
+        return "double";
+    case JsonType::BOOL:
+        return "bool";
+    case JsonType::ARRAY:
+        return "std::vector";
+    }
+    return ""; // unreachable
+}

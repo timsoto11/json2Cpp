@@ -25,4 +25,7 @@ std::string underscoreToCamelCase(const std::string &str)
     return result;
 }
 
-bool sameNode(JSTNode *node1, JSTNode *node2) {}
+bool sameNode(JSTNode *node1, JSTNode *node2)
+{
+    return false;
+}
