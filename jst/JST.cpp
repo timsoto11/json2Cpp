@@ -131,7 +131,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
         if (node->type == AST_PAIR &&
             std::string(node->key).compare("\"properties\"") != 0)
         {
-            auto child = std::make_shared<JSTNode>();
+            auto child = std::make_unique<JSTNode>();
             child->parent = &parent;
             if (std::string(node->key).compare("\"items\"") == 0) { child->name = parent.name; }
             else { child->name = std::string(node->key).substr(1, std::strlen(node->key) - 2); }
