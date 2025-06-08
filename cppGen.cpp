@@ -1,6 +1,7 @@
 #include <cstring>
 #include <fstream>  // std::ofstream
 #include <iostream> // std::iostream
+#include <map>      // std::map
 #include <memory>   // unique and make_unique
 #include <string>
 #include <vector>
@@ -33,8 +34,17 @@ generator::generator(ASTNode *node)
     }
 }
 
-void cpp::generator::generateStruct(const JSTNode &node)
+void generator::generateStruct(const JSTNode &node)
 {
+    auto search = map.find(node.name);
+    if (search != map.end())
+    {
+        std::cout << "Found " << search->first << '\n';
+        // Check if identical to found node
+        if (sameNode(search->second, node) == true) { return; }
+    }
+    else { map[node.name] = node; } // Insert new node
+
     std::string structStr;
 
     structStr += "struct " + underscoreToCamelCase(node.name) + " {\n";

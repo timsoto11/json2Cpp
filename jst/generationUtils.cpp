@@ -25,7 +25,23 @@ std::string underscoreToCamelCase(const std::string &str)
     return result;
 }
 
-bool sameNode(JSTNode *node1, JSTNode *node2)
+bool sameNode(const JSTNode &node1, const JSTNode &node2)
 {
-    return false;
+    if (node1.name != node2.name) { return false; }
+    if (node1.type != node2.type) { return false; }
+    if (node1.minimum != node2.minimum) { return false; }
+    if (node1.maximum != node2.maximum) { return false; }
+
+    if (node1.children.size() != node2.children.size()) { return false; }
+
+    for (int i = 0; i < node1.children.size(); i++)
+    {
+        const auto &child1 = *node1.children[i];
+        const auto &child2 = *node2.children[i];
+
+        const bool isSame = sameNode(child1, child2);
+        if (isSame == false) { return false; }
+    }
+
+    return true;
 }
