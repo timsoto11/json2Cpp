@@ -17,5 +17,6 @@ int main()
     cpp::generator a(root);
 
     free_ast(root);
+
     return 0;
 }
