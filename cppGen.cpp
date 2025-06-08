@@ -22,6 +22,7 @@ generator::generator(ASTNode *node)
 
     std::ofstream fs("violationSettings.hpp");
 
+    fs << "#include <cstdint>\n";
     fs << "#include <string>\n";
     fs << "#include <vector>\n";
     fs << '\n';
@@ -32,7 +33,7 @@ generator::generator(ASTNode *node)
     }
 }
 
-void cpp::generator::generateStruct(JSTNode &node)
+void cpp::generator::generateStruct(const JSTNode &node)
 {
     std::string structStr;
 
@@ -47,22 +48,56 @@ void cpp::generator::generateStruct(JSTNode &node)
         }
         else if (child->type == JsonType::ARRAY)
         {
-            structStr += "\t" + toString(child->type) + '<' + underscoreToCamelCase(child->name) + "> " + child->name + ";\n";
+            structStr += "\t" + toString(*child) + '<' + underscoreToCamelCase(child->name) + "> " + child->name + ";\n";
             generateStruct(*(child->children[0]));
             // generate Struct for this
         }
         else
         {
-            structStr += "\t" + toString(child->type) + ' ' + child->name + ";\n";
+            structStr += "\t" + toString(*child) + ' ' + child->name + ";\n";
         }
     }
     structStr += "};\n";
     structStrings.push_back(structStr);
 }
 
-std::string generator::toString(const JsonType &value)
+std::string cpp::generator::handleInts(const JSTNode &node)
 {
-    switch (value)
+    if (node.type != JsonType::INTEGER) { return "ERROR"; }
+
+    if (node.minimum == std::numeric_limits<int64_t>::min() &&
+        node.maximum == std::numeric_limits<int64_t>::max()) { return "int64_t"; } // our default
+
+    if (node.minimum >= std::numeric_limits<uint8_t>::min() &&
+        node.maximum <= std::numeric_limits<uint8_t>::max()) { return "uint8_t"; }
+
+    if (node.minimum >= std::numeric_limits<uint16_t>::min() &&
+        node.maximum <= std::numeric_limits<uint16_t>::max()) { return "uint16_t"; }
+
+    if (node.minimum >= std::numeric_limits<uint32_t>::min() &&
+        node.maximum <= std::numeric_limits<uint32_t>::max()) { return "uint32_t"; }
+
+    if (node.minimum >= std::numeric_limits<uint64_t>::min() &&
+        node.maximum <= std::numeric_limits<uint64_t>::max()) { return "uint64_t"; }
+
+    if (node.minimum >= std::numeric_limits<int8_t>::min() &&
+        node.maximum <= std::numeric_limits<int8_t>::max()) { return "int8_t"; }
+
+    if (node.minimum >= std::numeric_limits<int16_t>::min() &&
+        node.maximum <= std::numeric_limits<int16_t>::max()) { return "int16_t"; }
+
+    if (node.minimum >= std::numeric_limits<int32_t>::min() &&
+        node.maximum <= std::numeric_limits<int32_t>::max()) { return "int32_t"; }
+
+    if (node.minimum >= std::numeric_limits<int64_t>::min() &&
+        node.maximum <= std::numeric_limits<int64_t>::max()) { return "int64_t"; }
+
+    return "ERROR";
+}
+
+std::string generator::toString(const JSTNode &node)
+{
+    switch (node.type)
     {
     case JsonType::UNKNOWN:
         return "Unknown";
@@ -73,7 +108,7 @@ std::string generator::toString(const JsonType &value)
     case JsonType::ENUM:
         return "enum";
     case JsonType::INTEGER:
-        return "int";
+        return handleInts(node);
     case JsonType::NUMBER:
         return "double";
     case JsonType::BOOL:

@@ -19,11 +19,12 @@ private:
     std::vector<std::string> enumsStrings;
     std::vector<std::string> structStrings;
 
-    void generateStruct(JSTNode &node);
+    void generateStruct(const JSTNode &node);
 
     std::map<std::string, JSTNode> map;
 
-    static std::string toString(const JsonType &value);
+    static std::string handleInts(const JSTNode &node);
+    static std::string toString(const JSTNode &value);
 };
 }
 
