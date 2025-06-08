@@ -19,9 +19,9 @@ private:
     std::vector<std::string> enumsStrings;
     std::vector<std::string> structStrings;
 
-    void generateStruct(const JSTNode &node);
+    void generateStruct(JSTNode *node);
 
-    std::map<std::string, JSTNode> map;
+    std::map<std::string, JSTNode *> map;
 
     static std::string handleInts(const JSTNode &node);
     static std::string toString(const JSTNode &value);
