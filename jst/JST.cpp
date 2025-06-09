@@ -26,7 +26,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
     }
     case AST_ARRAY:
     {
-        // printf("AST_ARRAY\n");
+        printf("AST_ARRAY\n");
         break;
     }
     case AST_STRING:
@@ -53,7 +53,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
         else if (std::string(node->key).compare("\"enum\"") == 0)
         {
             parent.hasEnum = true;
-            return;
+            break;
         }
         else if (std::string(node->key).compare("\"title\"") == 0) { return; }
         else if (std::string(node->key).compare("\"$comment\"") == 0) { return; }
@@ -61,7 +61,11 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
         else if (std::string(node->key).compare("\"description\"") == 0) { return; }
         else if (std::string(node->key).compare("\"items\"") == 0) { break; }
         else if (std::string(node->key).compare("\"pattern\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"oneOf\"") == 0) { return; } // TODO: Build enum
+        else if (std::string(node->key).compare("\"oneOf\"") == 0)
+        {
+            parent.hasEnum = true;
+            break;
+        } // TODO: Build enum
         else if (std::string(node->key).compare("\"minimum\"") == 0)
         {
             parent.minimum = std::stoi(node->children[0]->string_value);
@@ -129,13 +133,24 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
     for (int i = 0; i < node->child_count; ++i)
     {
         if (node->type == AST_PAIR &&
-            std::string(node->key).compare("\"properties\"") != 0)
+            std::string(node->key).compare("\"properties\"") != 0 &&
+            std::string(node->key).compare("\"oneOf\"") != 0)
         {
             auto child = JSTNode();
             child.parent = &parent;
             if (std::string(node->key).compare("\"items\"") == 0) { child.name = parent.name; }
             else { child.name = std::string(node->key).substr(1, std::strlen(node->key) - 2); }
 
+            // std::cout << child->name << " is a child of " << parent->name << '\n';
+            parent.children.push_back(child);
+            generateJST(node->children[i], parent.children.back());
+        }
+        if (node->type == AST_NUMBER)
+        {
+            auto child = JSTNode();
+            child.parent = &parent;
+            child.type = JsonType::NUMBER;
+            child.name = std::string(node->string_value);
             // std::cout << child->name << " is a child of " << parent->name << '\n';
             parent.children.push_back(child);
             generateJST(node->children[i], parent.children.back());

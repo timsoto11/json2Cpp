@@ -16,9 +16,9 @@ generator::generator(ASTNode *node)
 {
     auto root = JstGenerator::generateJST(node);
 
-    // std::cout << "Generated Tree:\n";
-    // JstGenerator::print_jst(root.get(), 0);
-    // std::cout << "\n\n";
+    std::cout << "Generated Tree:\n";
+    JstGenerator::print_jst(root.get(), 0);
+    std::cout << "\n\n";
 
     generateStruct(*root);
 
@@ -51,7 +51,7 @@ void generator::generateStruct(JSTNode &node)
 
     std::string structStr;
 
-    structStr += "struct " + underscoreToCamelCase(node.name) + " {\n";
+    structStr += "struct " + underscoreToCamelCase(node.name) + "\n{\n";
     for (auto &child : node.children)
     {
         if (child.type == JsonType::OBJECT)
