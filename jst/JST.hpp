@@ -87,7 +87,7 @@ public:
     std::string name;
     bool hasEnum = false;
     JSTNode *parent;
-    std::vector<std::unique_ptr<JSTNode>> children; // For arrays/objects
+    std::vector<JSTNode> children; // For arrays/objects
     int64_t minimum = std::numeric_limits<int64_t>::min();
     int64_t maximum = std::numeric_limits<int64_t>::max();
 };
