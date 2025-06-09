@@ -131,14 +131,14 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
         if (node->type == AST_PAIR &&
             std::string(node->key).compare("\"properties\"") != 0)
         {
-            auto child = std::make_unique<JSTNode>();
-            child->parent = &parent;
-            if (std::string(node->key).compare("\"items\"") == 0) { child->name = parent.name; }
-            else { child->name = std::string(node->key).substr(1, std::strlen(node->key) - 2); }
+            auto child = JSTNode();
+            child.parent = &parent;
+            if (std::string(node->key).compare("\"items\"") == 0) { child.name = parent.name; }
+            else { child.name = std::string(node->key).substr(1, std::strlen(node->key) - 2); }
 
             // std::cout << child->name << " is a child of " << parent->name << '\n';
-            parent.children.push_back(std::move(child));
-            generateJST(node->children[i], *(parent.children.back()));
+            parent.children.push_back(child);
+            generateJST(node->children[i], parent.children.back());
         }
         else
         {
@@ -155,6 +155,6 @@ void JstGenerator::print_jst(const JSTNode *const node, int indent)
     std::cout << space << node->type.toString() << ' ' << node->name << '\n';
     for (const auto &child : node->children)
     {
-        print_jst(child.get(), indent + 1);
+        print_jst(&child, indent + 1);
     }
 }

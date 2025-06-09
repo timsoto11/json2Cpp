@@ -19,7 +19,8 @@ generator::generator(ASTNode *node)
     // std::cout << "Generated Tree:\n";
     // JstGenerator::print_jst(root.get(), 0);
     // std::cout << "\n\n";
-    generateStruct(root.get());
+
+    generateStruct(*root);
 
     std::ofstream fs("violationSettings.hpp");
 
@@ -34,40 +35,40 @@ generator::generator(ASTNode *node)
     }
 }
 
-void generator::generateStruct(JSTNode *node)
+void generator::generateStruct(JSTNode &node)
 {
-    auto search = map.find(node->name);
+    auto search = map.find(node.name);
     if (search != map.end())
     {
         // Check if identical to found node
         if (sameNode(search->second, node) == true) { return; }
 
-        const std::string grandParent = node->parent->parent->name;
-        node->name = node->parent->name + '_' + grandParent;
-        node->parent->name = node->parent->name + '_' + grandParent;
+        const std::string grandParent = node.parent->parent->name;
+        node.name = node.parent->name + '_' + grandParent;
+        node.parent->name = node.parent->name + '_' + grandParent;
     }
-    else { map[node->name] = node; } // Insert new node
+    else { map.insert({node.name, node}); }
 
     std::string structStr;
 
-    structStr += "struct " + underscoreToCamelCase(node->name) + " {\n";
-    for (const auto &child : node->children)
+    structStr += "struct " + underscoreToCamelCase(node.name) + " {\n";
+    for (auto &child : node.children)
     {
-        if (child->type == JsonType::OBJECT)
+        if (child.type == JsonType::OBJECT)
         {
-            generateStruct(child.get());
-            structStr += "\t" + underscoreToCamelCase(child->name) + ' ' + child->name + ";\n";
+            generateStruct(child);
+            structStr += "\t" + underscoreToCamelCase(child.name) + ' ' + child.name + ";\n";
             // generate Struct for this
         }
-        else if (child->type == JsonType::ARRAY)
+        else if (child.type == JsonType::ARRAY)
         {
-            generateStruct(child->children[0].get()); // Generate struct first because it may change child->name, if duplicates are found
-            structStr += "\t" + toString(*child) + '<' + underscoreToCamelCase(child->name) + "> " + child->name + ";\n";
+            generateStruct(child.children[0]); // Generate struct first because it may change child->name, if duplicates are found
+            structStr += "\t" + toString(child) + '<' + underscoreToCamelCase(child.name) + "> " + child.name + ";\n";
             // generate Struct for this
         }
         else
         {
-            structStr += "\t" + toString(*child) + ' ' + child->name + ";\n";
+            structStr += "\t" + toString(child) + ' ' + child.name + ";\n";
         }
     }
     structStr += "};\n";
