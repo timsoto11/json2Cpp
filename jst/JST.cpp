@@ -9,7 +9,7 @@ std::unique_ptr<JSTNode> JstGenerator::generateJST(ASTNode *node)
 {
     auto root = std::make_unique<JSTNode>();
     root->parent = nullptr;
-    root->name = "violationSettings";
+    root->name = "settings";
 
     generateJST(node, *root);
     return root;
@@ -49,6 +49,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
         }
 
         if (std::string(node->key).compare("\"$schema\"") == 0) { return; }
+        if (std::string(node->key).compare("\"$id\"") == 0) { return; }
         else if (std::string(node->key).compare("\"required\"") == 0) { return; }
         else if (std::string(node->key).compare("\"enum\"") == 0)
         {
@@ -61,37 +62,41 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
         else if (std::string(node->key).compare("\"description\"") == 0) { return; }
         else if (std::string(node->key).compare("\"items\"") == 0) { break; }
         else if (std::string(node->key).compare("\"pattern\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"oneOf\"") == 0) { return; } // TODO: Build enum
+        else if (std::string(node->key).compare("\"oneOf\"") == 0)
+        {
+            parent.hasEnum = true;
+            // return;
+        }
         else if (std::string(node->key).compare("\"minimum\"") == 0)
         {
             parent.minimum = std::stoi(node->children[0]->string_value);
             return;
-        } // TODO: Modify parent
+        }
         else if (std::string(node->key).compare("\"maximum\"") == 0)
         {
             parent.maximum = std::stoi(node->children[0]->string_value);
             return;
-        } // TODO: Modify parent
+        }
         else if (std::string(node->key).compare("\"minLength\"") == 0)
         {
             parent.minimum = std::stoi(node->children[0]->string_value);
             return;
-        } // TODO: Modify parent
+        }
         else if (std::string(node->key).compare("\"maxLength\"") == 0)
         {
             parent.maximum = std::stoi(node->children[0]->string_value);
             return;
-        } // TODO: Modify parent
+        }
         else if (std::string(node->key).compare("\"minItems\"") == 0)
         {
             parent.minimum = std::stoi(node->children[0]->string_value);
             return;
-        } // TODO: Modify parent
+        }
         else if (std::string(node->key).compare("\"maxItems\"") == 0)
         {
             parent.maximum = std::stoi(node->children[0]->string_value);
             return;
-        } // TODO: Modify parent
+        }
         else if (std::string(node->key).compare("\"description\"") == 0) { return; }
         else if (std::string(node->key).compare("\"docHint\"") == 0) { return; }
         else if (std::string(node->key).compare("\"type\"") == 0) // TODO: Handle multiple types ex. "type": ["array", "null"]
@@ -136,7 +141,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
             if (std::string(node->key).compare("\"items\"") == 0) { child.name = parent.name; }
             else { child.name = std::string(node->key).substr(1, std::strlen(node->key) - 2); }
 
-            // std::cout << child->name << " is a child of " << parent->name << '\n';
+            // std::cout << child.name << " is a child of " << parent.name << '\n';
             parent.children.push_back(child);
             generateJST(node->children[i], parent.children.back());
         }

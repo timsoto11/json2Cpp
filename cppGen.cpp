@@ -20,9 +20,9 @@ generator::generator(ASTNode *node)
     // JstGenerator::print_jst(root.get(), 0);
     // std::cout << "\n\n";
 
-    generateStruct(*root);
+    generateStruct(*root); // populates structStrings
 
-    std::ofstream fs("violationSettings.hpp");
+    std::ofstream fs("settings-generated.hpp");
 
     fs << "#include <cstdint>\n";
     fs << "#include <string>\n";
@@ -51,7 +51,7 @@ void generator::generateStruct(JSTNode &node)
 
     std::string structStr;
 
-    structStr += "struct " + underscoreToCamelCase(node.name) + " {\n";
+    structStr += "struct " + underscoreToCamelCase(node.name) + "\n{\n";
     for (auto &child : node.children)
     {
         if (child.type == JsonType::OBJECT)
