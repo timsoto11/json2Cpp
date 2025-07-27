@@ -58,13 +58,19 @@ void generator::generateStruct(JSTNode &node)
         {
             generateStruct(child);
             structStr += "\t" + underscoreToCamelCase(child.name) + ' ' + child.name + ";\n";
-            // generate Struct for this
         }
         else if (child.type == JsonType::ARRAY)
         {
-            generateStruct(child.children[0]); // Generate struct first because it may change child->name, if duplicates are found
-            structStr += "\t" + toString(child) + '<' + underscoreToCamelCase(child.name) + "> " + child.name + ";\n";
-            // generate Struct for this
+            // If the type is an object we need to generate a struct, otherwise this is a vector of something already defined (int, std::string...)
+            if (child.children[0].type != JsonType::OBJECT)
+            {
+                structStr += "\t" + toString(child) + '<' + toString(child.children[0]) + "> " + child.name + ";\n";
+            }
+            else
+            {
+                generateStruct(child.children[0]); // Generate struct first because it may change child->name, if duplicates are found
+                structStr += "\t" + toString(child) + '<' + underscoreToCamelCase(child.name) + "> " + child.name + ";\n";
+            }
         }
         else
         {
