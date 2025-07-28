@@ -96,11 +96,13 @@ class JstGenerator
 {
 public:
     JstGenerator() = default;
-    [[nodiscard]] static std::unique_ptr<JSTNode> generateJST(ASTNode *node);
-    void static print_jst(const JSTNode *const node, int indent);
+    [[nodiscard]] std::unique_ptr<JSTNode> generateJST(ASTNode *node);
+    void print_jst(const JSTNode *const node, int indent);
 
 private:
-    static void generateJST(ASTNode *node, JSTNode &cstNode);
+    void generateJST(ASTNode *node, JSTNode &cstNode);
+    std::vector<JSTNode *> placeholders;
+    JSTNode *getPlaceHolder(ASTNode *node);
 };
 
 #endif

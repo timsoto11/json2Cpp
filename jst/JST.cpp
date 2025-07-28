@@ -106,6 +106,16 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
         }
         else if (std::string(node->key).compare("\"properties\"") == 0) { break; }
         else if (std::string(node->key).compare("\"additionalProperties\"") == 0) { return; }
+        else if (std::string(node->key).compare("\"$ref\"") == 0)
+        {
+            std::cout << "Placeholder found " << node->children[0]->string_value << "\n";
+            parent.name = node->children[0]->string_value;
+
+            parent.type = JsonType::UNKNOWN;
+            placeholders.push_back(&parent);
+
+            return;
+        }
         // printf("Pair: %s\n", node->key);
 
         break;
@@ -136,20 +146,54 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
         if (node->type == AST_PAIR &&
             std::string(node->key).compare("\"properties\"") != 0)
         {
-            auto child = JSTNode();
-            child.parent = &parent;
-            if (std::string(node->key).compare("\"items\"") == 0) { child.name = parent.name; }
-            else { child.name = std::string(node->key).substr(1, std::strlen(node->key) - 2); }
+            auto tmpName = std::string(node->key).substr(1, std::strlen(node->key) - 2);
+            // std::cout << tmpName << " is a child of " << parent.name << '\n';
 
-            // std::cout << child.name << " is a child of " << parent.name << '\n';
-            parent.children.push_back(child);
-            generateJST(node->children[i], parent.children.back());
+            if (tmpName == "$defs")
+            {
+                // print_ast(node->children[i], 0);
+                auto jstParent = getPlaceHolder(node->children[i]);
+                if (jstParent != nullptr)
+                {
+
+                    const std::string reference = jstParent->parent->children.back().name;
+                    const std::size_t pos1 = reference.find_last_of('/') + 1;
+                    const std::size_t pos2 = reference.find_last_of('\"');
+                    jstParent->parent->name = reference.substr(pos1, pos2 - pos1);
+                    jstParent->parent->children.pop_back();
+
+                    generateJST(node->children[i], *jstParent->parent);
+                }
+            }
+            else
+            {
+                auto child = JSTNode();
+                child.parent = &parent;
+                if (std::string(node->key).compare("\"items\"") == 0) { child.name = parent.name; }
+                else { child.name = tmpName; }
+
+                parent.children.push_back(child);
+                generateJST(node->children[i], parent.children.back());
+            }
         }
         else
         {
             generateJST(node->children[i], parent);
         }
     }
+}
+
+JSTNode *JstGenerator::getPlaceHolder(ASTNode *node)
+{
+    for (auto iter = placeholders.begin(); iter != placeholders.end();)
+    {
+        auto tmp = iter;
+
+        iter = placeholders.erase(iter);
+        return *tmp;
+    }
+
+    return nullptr;
 }
 
 void JstGenerator::print_jst(const JSTNode *const node, int indent)

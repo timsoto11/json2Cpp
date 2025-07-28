@@ -14,13 +14,16 @@ using namespace cpp;
 
 generator::generator(ASTNode *node)
 {
-    auto root = JstGenerator::generateJST(node);
+    JstGenerator gen;
+    auto root = gen.generateJST(node);
 
     // std::cout << "Generated Tree:\n";
     // JstGenerator::print_jst(root.get(), 0);
     // std::cout << "\n\n";
 
     generateStruct(*root); // populates structStrings
+
+    gen.print_jst(root.get(), 0);
 
     std::ofstream fs("settings-generated.hpp");
 
