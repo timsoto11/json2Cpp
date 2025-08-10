@@ -5,16 +5,16 @@
     "title": "Arrays",
     "type": "object",
     "properties": {
-        "fruits": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
-        },
         "vegetables": {
             "type": "array",
             "items": {
                 "$ref": "#/$defs/veggie"
+            }
+        },
+        "fruits": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/fruity"
             }
         }
     },
@@ -33,6 +33,23 @@
                 "veggieLike": {
                     "type": "boolean",
                     "description": "Do I like this vegetable?"
+                }
+            }
+        },
+        "fruity": {
+            "type": "object",
+            "required": [
+                "fruityName",
+                "fruityLike"
+            ],
+            "properties": {
+                "fruityName": {
+                    "type": "string",
+                    "description": "The name of the fruit."
+                },
+                "fruityLike": {
+                    "type": "boolean",
+                    "description": "Do I like this fruit?"
                 }
             }
         }

@@ -146,7 +146,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
         if (node->type == AST_PAIR &&
             std::string(node->key).compare("\"properties\"") != 0)
         {
-            auto tmpName = std::string(node->key).substr(1, std::strlen(node->key) - 2);
+            const auto tmpName = std::string(node->key).substr(1, std::strlen(node->key) - 2);
             // std::cout << tmpName << " is a child of " << parent.name << '\n';
 
             if (tmpName == "$defs")
@@ -185,9 +185,12 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
 
 JSTNode *JstGenerator::getPlaceHolder(ASTNode *node)
 {
+
     for (auto iter = placeholders.begin(); iter != placeholders.end();)
     {
         auto tmp = iter;
+        std::cout << "placeholder name: " << (*iter)->name << '\n';
+        std::cout << "definition name: " << node->children[0]->key << '\n';
 
         iter = placeholders.erase(iter);
         return *tmp;
