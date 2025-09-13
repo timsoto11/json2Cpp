@@ -4,6 +4,16 @@
 
 #include "ast.h"
 
+static char *remove_quotes(char *s1)
+{
+    if (s1[0] == '"' && s1[strlen(s1) - 1] == '"')
+    {
+        s1[strlen(s1) - 1] = '\0';
+        return s1 + 1;
+    }
+    return s1;
+}
+
 ASTNode *create_node(ASTNodeType type)
 {
     ASTNode *node = malloc(sizeof(ASTNode));
@@ -18,7 +28,7 @@ ASTNode *create_node(ASTNodeType type)
 ASTNode *create_string_node(char *value)
 {
     ASTNode *node = create_node(AST_STRING);
-    node->string_value = strdup(value);
+    node->string_value = strdup(remove_quotes(value));
     return node;
 }
 
@@ -53,7 +63,7 @@ ASTNode *create_null_node()
 ASTNode *create_pair_node(char *key, ASTNode *value)
 {
     ASTNode *node = create_node(AST_PAIR);
-    node->key = strdup(key);
+    node->key = strdup(remove_quotes(key));
     add_child(node, value);
     return node;
 }

@@ -25,18 +25,18 @@ std::string underscoreToCamelCase(const std::string &str)
     return result;
 }
 
-bool sameNode(const JSTNode &node1, const JSTNode &node2)
+bool sameNode(const JSTNode *node1, const JSTNode *node2)
 {
-    if (node1.name != node2.name) { return false; }
-    if (node1.type != node2.type) { return false; }
-    if (node1.minimum != node2.minimum) { return false; }
-    if (node1.maximum != node2.maximum) { return false; }
+    if (node1->name != node2->name) { return false; }
+    if (node1->type != node2->type) { return false; }
+    if (node1->minimum != node2->minimum) { return false; }
+    if (node1->maximum != node2->maximum) { return false; }
 
-    if (node1.children.size() != node2.children.size()) { return false; }
+    if (node1->children.size() != node2->children.size()) { return false; }
 
-    for (int i = 0; i < node1.children.size(); i++)
+    for (int i = 0; i < node1->children.size(); i++)
     {
-        const bool isSame = sameNode(node1.children[i], node2.children[i]);
+        const bool isSame = sameNode(node1->children[i].get(), node2->children[i].get());
         if (isSame == false) { return false; }
     }
 

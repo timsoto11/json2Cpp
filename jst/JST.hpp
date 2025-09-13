@@ -86,8 +86,8 @@ public:
     JsonType type = JsonType::UNKNOWN;
     std::string name;
     bool hasEnum = false;
-    JSTNode *parent;
-    std::vector<JSTNode> children; // For arrays/objects
+
+    std::vector<std::unique_ptr<JSTNode>> children;
     int64_t minimum = std::numeric_limits<int64_t>::min();
     int64_t maximum = std::numeric_limits<int64_t>::max();
 };
@@ -100,9 +100,11 @@ public:
     void print_jst(const JSTNode *const node, int indent);
 
 private:
-    void generateJST(ASTNode *node, JSTNode &cstNode);
+    void generateJST(ASTNode *node, JSTNode *cstNode);
+    void handlePlaceholders();
     std::vector<JSTNode *> placeholders;
-    JSTNode *getPlaceHolder(ASTNode *node);
+    ASTNode *defs = nullptr;
+    JSTNode *getPlaceHolder(const std::string &name);
 };
 
 #endif
