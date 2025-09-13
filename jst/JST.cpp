@@ -8,14 +8,24 @@
 std::unique_ptr<JSTNode> JstGenerator::generateJST(ASTNode *node)
 {
     auto root = std::make_unique<JSTNode>();
-    root->parent = nullptr;
     root->name = "settings";
 
-    generateJST(node, *root);
+    generateJST(node, root.get());
+
+    std::cout << "\n\n\n";
+    print_jst(root.get(), 0);
+    std::cout << "\n\n\n";
+
+    handlePlaceholders();
+
+    std::cout << "\n\n\n";
+    print_jst(root.get(), 0);
+    std::cout << "\n\n\n";
+
     return root;
 }
 
-void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
+void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
 {
     switch (node->type)
     {
@@ -48,71 +58,74 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
             break;
         }
 
-        if (std::string(node->key).compare("\"$schema\"") == 0) { return; }
-        if (std::string(node->key).compare("\"$id\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"required\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"enum\"") == 0)
+        if (std::string(node->key).compare("$schema") == 0) { return; }
+        if (std::string(node->key).compare("$id") == 0) { return; }
+        else if (std::string(node->key).compare("required") == 0) { return; }
+        else if (std::string(node->key).compare("enum") == 0)
         {
-            parent.hasEnum = true;
+            jNode->hasEnum = true;
             return;
         }
-        else if (std::string(node->key).compare("\"title\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"$comment\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"default\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"description\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"items\"") == 0) { break; }
-        else if (std::string(node->key).compare("\"pattern\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"oneOf\"") == 0)
+        else if (std::string(node->key).compare("title") == 0) { return; }
+        else if (std::string(node->key).compare("$comment") == 0) { return; }
+        else if (std::string(node->key).compare("default") == 0) { return; }
+        else if (std::string(node->key).compare("description") == 0) { return; }
+        else if (std::string(node->key).compare("items") == 0) { break; }
+        else if (std::string(node->key).compare("pattern") == 0) { return; }
+        else if (std::string(node->key).compare("oneOf") == 0)
         {
-            parent.hasEnum = true;
-            // return;
-        }
-        else if (std::string(node->key).compare("\"minimum\"") == 0)
-        {
-            parent.minimum = std::stoi(node->children[0]->string_value);
+            jNode->hasEnum = true;
             return;
         }
-        else if (std::string(node->key).compare("\"maximum\"") == 0)
+        else if (std::string(node->key).compare("minimum") == 0)
         {
-            parent.maximum = std::stoi(node->children[0]->string_value);
+            jNode->minimum = std::stoi(node->children[0]->string_value);
             return;
         }
-        else if (std::string(node->key).compare("\"minLength\"") == 0)
+        else if (std::string(node->key).compare("maximum") == 0)
         {
-            parent.minimum = std::stoi(node->children[0]->string_value);
+            jNode->maximum = std::stoi(node->children[0]->string_value);
             return;
         }
-        else if (std::string(node->key).compare("\"maxLength\"") == 0)
+        else if (std::string(node->key).compare("minLength") == 0)
         {
-            parent.maximum = std::stoi(node->children[0]->string_value);
+            jNode->minimum = std::stoi(node->children[0]->string_value);
             return;
         }
-        else if (std::string(node->key).compare("\"minItems\"") == 0)
+        else if (std::string(node->key).compare("maxLength") == 0)
         {
-            parent.minimum = std::stoi(node->children[0]->string_value);
+            jNode->maximum = std::stoi(node->children[0]->string_value);
             return;
         }
-        else if (std::string(node->key).compare("\"maxItems\"") == 0)
+        else if (std::string(node->key).compare("minItems") == 0)
         {
-            parent.maximum = std::stoi(node->children[0]->string_value);
+            jNode->minimum = std::stoi(node->children[0]->string_value);
             return;
         }
-        else if (std::string(node->key).compare("\"description\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"docHint\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"type\"") == 0) // TODO: Handle multiple types ex. "type": ["array", "null"]
+        else if (std::string(node->key).compare("maxItems") == 0)
         {
-            parent.type = JsonType(std::string(node->children[0]->string_value).substr(1, std::strlen(node->children[0]->string_value) - 2));
+            jNode->maximum = std::stoi(node->children[0]->string_value);
             return;
         }
-        else if (std::string(node->key).compare("\"properties\"") == 0) { break; }
-        else if (std::string(node->key).compare("\"additionalProperties\"") == 0) { return; }
-        else if (std::string(node->key).compare("\"$ref\"") == 0)
+        else if (std::string(node->key).compare("description") == 0) { return; }
+        else if (std::string(node->key).compare("docHint") == 0) { return; }
+        else if (std::string(node->key).compare("type") == 0) // TODO: Handle multiple types ex. "type": ["array", "null"]
+        {
+            jNode->type = JsonType(node->children[0]->string_value);
+            return;
+        }
+        else if (std::string(node->key).compare("properties") == 0) { break; }
+        else if (std::string(node->key).compare("additionalProperties") == 0) { return; }
+        else if (std::string(node->key).compare("$ref") == 0)
         {
             std::cout << "Placeholder found " << node->children[0]->string_value << "\n";
-            parent.name = node->children[0]->string_value;
+            // std::cout << "Placeholder found " << parent->parent->name << "\n";
+            // std::cout << "parent address: " << &parent << "\n";
 
-            parent.type = JsonType::UNKNOWN;
-            placeholders.push_back(&parent);
+            // Change parents name from items to whatever string_value is
+            jNode->name = node->children[0]->string_value;
+            jNode->type = JsonType::UNKNOWN;
+            placeholders.push_back(jNode);
 
             return;
         }
@@ -143,60 +156,72 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode &parent)
     }
     for (int i = 0; i < node->child_count; ++i)
     {
-        if (node->type == AST_PAIR &&
-            std::string(node->key).compare("\"properties\"") != 0)
+        if (node->type == AST_PAIR && std::string(node->key).compare("properties") != 0)
         {
-            const auto tmpName = std::string(node->key).substr(1, std::strlen(node->key) - 2);
-            // std::cout << tmpName << " is a child of " << parent.name << '\n';
+            const auto tmpName = std::string(node->key);
+            std::cout << tmpName << " is a child of " << jNode->name << '\n';
 
+            // definitions and references will be handled separately because we don't know which will come first.
             if (tmpName == "$defs")
             {
-                // print_ast(node->children[i], 0);
-                auto jstParent = getPlaceHolder(node->children[i]);
-                if (jstParent != nullptr)
-                {
-
-                    const std::string reference = jstParent->parent->children.back().name;
-                    const std::size_t pos1 = reference.find_last_of('/') + 1;
-                    const std::size_t pos2 = reference.find_last_of('\"');
-                    jstParent->parent->name = reference.substr(pos1, pos2 - pos1);
-                    jstParent->parent->children.pop_back();
-
-                    generateJST(node->children[i], *jstParent->parent);
-                }
+                if (defs != nullptr) { throw std::invalid_argument("multiple $defs"); }
+                defs = node;
+                continue;
             }
-            else
-            {
-                auto child = JSTNode();
-                child.parent = &parent;
-                if (std::string(node->key).compare("\"items\"") == 0) { child.name = parent.name; }
-                else { child.name = tmpName; }
 
-                parent.children.push_back(child);
-                generateJST(node->children[i], parent.children.back());
-            }
+            jNode->children.push_back({std::make_unique<JSTNode>()});
+            auto &child = jNode->children.back();
+            child->name = tmpName;
+
+            // std::cout << child.name << "(" << &child << ')' << " of " << jNode->name << "(" << &jNode << ')' << '\n';
+            generateJST(node->children[i], jNode->children.back().get());
         }
         else
         {
-            generateJST(node->children[i], parent);
+            // std::cout << parent->name << "(" << &parent << ')' << '\n';
+            generateJST(node->children[i], jNode);
         }
     }
 }
 
-JSTNode *JstGenerator::getPlaceHolder(ASTNode *node)
+JSTNode *JstGenerator::getPlaceHolder(const std::string &name)
 {
-
     for (auto iter = placeholders.begin(); iter != placeholders.end();)
     {
-        auto tmp = iter;
-        std::cout << "placeholder name: " << (*iter)->name << '\n';
-        std::cout << "definition name: " << node->children[0]->key << '\n';
-
-        iter = placeholders.erase(iter);
-        return *tmp;
+        std::cout << "placeholder name: " << (*iter)->name << " : " << name << '\n';
+        if (name != (*iter)->name)
+        {
+            std::cout << "not the same!\n";
+            iter++;
+            continue;
+        }
+        const auto tmp = *iter;
+        placeholders.erase(iter);
+        std::cout << "returning " << tmp->name << '\n';
+        return tmp;
     }
 
     return nullptr;
+}
+
+void JstGenerator::handlePlaceholders()
+{
+    if (defs == nullptr) { return; }
+
+    for (int i = 0; i < defs->children[0]->child_count; i++)
+    {
+        const std::string placeholderName = std::string("#/$defs/") + defs->children[0]->children[i]->key;
+        auto jstParent = getPlaceHolder(placeholderName);
+        if (jstParent != nullptr)
+        {
+            jstParent->name = defs->children[0]->children[i]->key;
+            for (int j = 0; j < defs->children[0]->children[i]->child_count; j++)
+            {
+                generateJST(defs->children[0]->children[i]->children[j], jstParent);
+            }
+        }
+        // else { std::cout << "parent is null\n"; }
+    }
 }
 
 void JstGenerator::print_jst(const JSTNode *const node, int indent)
@@ -204,9 +229,9 @@ void JstGenerator::print_jst(const JSTNode *const node, int indent)
     std::string space;
     for (int i = 0; i < indent; ++i) space += '\t';
 
-    std::cout << space << node->type.toString() << ' ' << node->name << '\n';
+    std::cout << space << node->type.toString() << ' ' << node->name << ' ' << node << '\n';
     for (const auto &child : node->children)
     {
-        print_jst(&child, indent + 1);
+        print_jst(child.get(), indent + 1);
     }
 }

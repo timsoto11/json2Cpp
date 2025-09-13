@@ -6,6 +6,6 @@
 #include "JST.hpp"
 
 std::string underscoreToCamelCase(const std::string &str);
-bool sameNode(const JSTNode &node1, const JSTNode &node2);
+bool sameNode(const JSTNode *node1, const JSTNode *node2);
 
 #endif

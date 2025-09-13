@@ -22,4 +22,4 @@ jsonSchema: ast/parser.o ast/scanner.o ast/ast.o jst/generationUtils.o jst/JST.o
 	$(CPP) $^ -o $@
 
 clean:
-	rm -f *.o **/*.o ast/parser.c ast/parser.h scanner.c jsonSchema 
+	rm -f *.o **/*.o ast/parser.c ast/parser.h ast/scanner.c jsonSchema 
