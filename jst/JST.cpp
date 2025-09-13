@@ -11,16 +11,11 @@ std::unique_ptr<JSTNode> JstGenerator::generateJST(ASTNode *node)
     root->name = "settings";
 
     generateJST(node, root.get());
-
-    std::cout << "\n\n\n";
-    print_jst(root.get(), 0);
-    std::cout << "\n\n\n";
-
     handlePlaceholders();
 
-    std::cout << "\n\n\n";
-    print_jst(root.get(), 0);
-    std::cout << "\n\n\n";
+    // std::cout << "\n\n\n";
+    // print_jst(root.get(), 0);
+    // std::cout << "\n\n\n";
 
     return root;
 }
@@ -51,6 +46,8 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
     }
     case AST_PAIR:
     {
+        // TODO: need to manage what can be a variable name. Right now nothing can be named dependentRequired
+        if (std::string(node->key).compare("dependentRequired") == 0) { return; }
         // This check allows keywords to also be property names. So "type", or "required" can be objects names.
         if (node->child_count == 1 &&              // Make sure the child we're about to check is valid
             node->children[0]->type == AST_OBJECT) // If the child is an object its not a property of the parent.
@@ -58,6 +55,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
             break;
         }
 
+        // Need to put these into a map and benchmark. This is probably pretty SLOW.
         if (std::string(node->key).compare("$schema") == 0) { return; }
         if (std::string(node->key).compare("$id") == 0) { return; }
         else if (std::string(node->key).compare("required") == 0) { return; }
@@ -118,10 +116,6 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
         else if (std::string(node->key).compare("additionalProperties") == 0) { return; }
         else if (std::string(node->key).compare("$ref") == 0)
         {
-            std::cout << "Placeholder found " << node->children[0]->string_value << "\n";
-            // std::cout << "Placeholder found " << parent->parent->name << "\n";
-            // std::cout << "parent address: " << &parent << "\n";
-
             // Change parents name from items to whatever string_value is
             jNode->name = node->children[0]->string_value;
             jNode->type = JsonType::UNKNOWN;
@@ -129,7 +123,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
 
             return;
         }
-        // printf("Pair: %s\n", node->key);
+        //
 
         break;
     }
@@ -159,7 +153,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
         if (node->type == AST_PAIR && std::string(node->key).compare("properties") != 0)
         {
             const auto tmpName = std::string(node->key);
-            std::cout << tmpName << " is a child of " << jNode->name << '\n';
+            // std::cout << tmpName << " is a child of " << jNode->name << '\n';
 
             // definitions and references will be handled separately because we don't know which will come first.
             if (tmpName == "$defs")
@@ -220,7 +214,6 @@ void JstGenerator::handlePlaceholders()
                 generateJST(defs->children[0]->children[i]->children[j], jstParent);
             }
         }
-        // else { std::cout << "parent is null\n"; }
     }
 }
 
