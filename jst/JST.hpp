@@ -86,7 +86,7 @@ class JSTNode
 {
 public:
     // JsonType type = JsonType::UNKNOWN;
-    std::vector<JsonType> type;
+    std::vector<JsonType> type{JsonType()};
     std::string name;
     bool hasEnum = false;
 

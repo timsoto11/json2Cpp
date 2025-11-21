@@ -182,13 +182,17 @@ void JstGenerator::handleType(ASTNode *node, JSTNode *jNode)
 {
     if (node->type == AST_STRING) // Handle "type" : "number"
     {
-        jNode->type.push_back(JsonType(node->string_value));
+        jNode->type.at(0) = JsonType(node->string_value);
     }
     else if (node->type == AST_ARRAY) // Handle "type" : ["number"]
     {
         for (int i = 0; i < node->child_count; i++)
         {
-            jNode->type.push_back(JsonType(node->children[i]->string_value));
+            if (i == 0) { jNode->type.at(0) = JsonType(node->children[i]->string_value); }
+            else
+            {
+                jNode->type.push_back(JsonType(node->children[i]->string_value));
+            }
         }
     }
 }
