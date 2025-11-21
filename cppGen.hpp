@@ -24,7 +24,7 @@ private:
 
     std::map<std::string, const JSTNode *> map;
 
-    static std::string handleInts(const JSTNode &node);
+    static std::string handleInts(const JSTNode &node, const uint32_t index);
     static std::string toString(const JSTNode &node, const uint32_t index = 0);
 };
 }

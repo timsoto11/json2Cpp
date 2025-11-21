@@ -109,9 +109,9 @@ void generator::generateStruct(JSTNode *node)
     structStrings.push_back(structStr);
 }
 
-std::string cpp::generator::handleInts(const JSTNode &node)
+std::string cpp::generator::handleInts(const JSTNode &node, const uint32_t index)
 {
-    if (node.type.at(0) != JsonType::INTEGER) { return "ERROR"; }
+    if (node.type.at(index) != JsonType::INTEGER) { return "ERROR"; }
 
     if (node.minimum == std::numeric_limits<int64_t>::min() &&
         node.maximum == std::numeric_limits<int64_t>::max()) { return "int64_t"; } // our default
@@ -157,7 +157,7 @@ std::string generator::toString(const JSTNode &node, const uint32_t index)
     case JsonType::ENUM:
         return "enum";
     case JsonType::INTEGER:
-        return handleInts(node);
+        return handleInts(node, index);
     case JsonType::NUMBER:
         return "double";
     case JsonType::BOOL:
