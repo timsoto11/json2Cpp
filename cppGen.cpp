@@ -34,6 +34,13 @@ generator::generator(ASTNode *node)
     fs << "#include <variant>\n";
     fs << '\n';
 
+    for (const auto &str : variantStrings)
+    {
+        fs << str << '\n';
+    }
+
+    fs << '\n';
+
     for (const auto &str : structStrings)
     {
         fs << str << '\n';
@@ -61,7 +68,20 @@ void generator::generateStruct(JSTNode *node)
     structStr += "struct " + underscoreToCamelCase(node->name) + "\n{\n";
     for (auto &child : node->children)
     {
-        if (child->type.size() > 1) { std::cout << "We need to handle a variant.\n"; }
+        if (child->type.size() > 1)
+        {
+            std::cout << "We need to handle a variant. " << child->name << '\n';
+            std::string varStr = "using " + underscoreToCamelCase(child->name) + " = std::variant<";
+            for (size_t i = 0; i < child->type.size(); i++)
+            {
+                varStr += toString(*child, i);
+                if (i < child->type.size() - 1) { varStr += ", "; }
+            }
+            varStr += ">;";
+            variantStrings.push_back(varStr);
+            structStr += "\t" + underscoreToCamelCase(child->name) + ' ' + child->name + ";\n";
+            continue;
+        }
         if (child->type.at(0) == JsonType::OBJECT)
         {
             generateStruct(child.get());
@@ -123,10 +143,10 @@ std::string cpp::generator::handleInts(const JSTNode &node)
     return "ERROR";
 }
 
-std::string generator::toString(const JSTNode &node)
+std::string generator::toString(const JSTNode &node, const uint32_t index)
 {
     if (node.type.size() == 0) { return "Unknown"; }
-    switch (node.type.at(0))
+    switch (node.type.at(index))
     {
     case JsonType::UNKNOWN:
         return "Unknown";
