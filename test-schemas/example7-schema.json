@@ -1,0 +1,29 @@
+{
+    "$id": "https://example.com/number-test.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "value1": {
+            "type": "number"
+        },
+        "value2": {
+            "type": [
+                "number",
+                "string"
+            ]
+        },
+        "nested": {
+            "type": "object",
+            "properties": {
+                "inner1": {
+                    "type": "number"
+                },
+                "inner2": {
+                    "type": [
+                        "number"
+                    ]
+                }
+            }
+        }
+    }
+}

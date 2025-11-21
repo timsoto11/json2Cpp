@@ -16,6 +16,7 @@ public:
 
 private:
     ASTNode *node;
+    std::vector<std::string> variantStrings;
     std::vector<std::string> enumsStrings;
     std::vector<std::string> structStrings;
 

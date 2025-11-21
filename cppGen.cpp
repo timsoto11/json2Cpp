@@ -27,9 +27,11 @@ generator::generator(ASTNode *node)
 
     std::ofstream fs("settings-generated.hpp");
 
+    // TODO: Only include when needed
     fs << "#include <cstdint>\n";
     fs << "#include <string>\n";
     fs << "#include <vector>\n";
+    fs << "#include <variant>\n";
     fs << '\n';
 
     for (const auto &str : structStrings)
@@ -50,22 +52,25 @@ void generator::generateStruct(JSTNode *node)
         // node->name = node->parent->name + '_' + grandParent;
         // node->parent->name = node->parent->name + '_' + grandParent;
     }
-    else { map.insert({node->name, node}); }
+    else {
+        map.insert({node->name, node});
+    }
 
     std::string structStr;
 
     structStr += "struct " + underscoreToCamelCase(node->name) + "\n{\n";
     for (auto &child : node->children)
     {
-        if (child->type == JsonType::OBJECT)
+        if (child->type.size() > 1) { std::cout << "We need to handle a variant.\n"; }
+        if (child->type.at(0) == JsonType::OBJECT)
         {
             generateStruct(child.get());
             structStr += "\t" + underscoreToCamelCase(child->name) + ' ' + child->name + ";\n";
         }
-        else if (child->type == JsonType::ARRAY)
+        else if (child->type.at(0) == JsonType::ARRAY)
         {
             // If the type is an object we need to generate a struct, otherwise this is a vector of something already defined (int, std::string...)
-            if (child->children[0]->type != JsonType::OBJECT)
+            if (child->children[0]->type.at(0) != JsonType::OBJECT)
             {
                 structStr += "\t" + toString(*child) + '<' + toString(*(child->children[0])) + "> " + child->name + ";\n";
             }
@@ -86,7 +91,7 @@ void generator::generateStruct(JSTNode *node)
 
 std::string cpp::generator::handleInts(const JSTNode &node)
 {
-    if (node.type != JsonType::INTEGER) { return "ERROR"; }
+    if (node.type.at(0) != JsonType::INTEGER) { return "ERROR"; }
 
     if (node.minimum == std::numeric_limits<int64_t>::min() &&
         node.maximum == std::numeric_limits<int64_t>::max()) { return "int64_t"; } // our default
@@ -120,7 +125,8 @@ std::string cpp::generator::handleInts(const JSTNode &node)
 
 std::string generator::toString(const JSTNode &node)
 {
-    switch (node.type)
+    if (node.type.size() == 0) { return "Unknown"; }
+    switch (node.type.at(0))
     {
     case JsonType::UNKNOWN:
         return "Unknown";

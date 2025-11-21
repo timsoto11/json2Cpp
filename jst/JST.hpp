@@ -36,7 +36,9 @@ public:
         else if (s == "number") { value = JsonType::NUMBER; }
         else if (s == "boolean") { value = JsonType::BOOL; }
         else if (s == "array") { value = JsonType::ARRAY; }
-        else { value = JsonType::UNKNOWN; }
+        else {
+            value = JsonType::UNKNOWN;
+        }
     }
 
     // Allow switch and comparisons.
@@ -83,7 +85,8 @@ private:
 class JSTNode
 {
 public:
-    JsonType type = JsonType::UNKNOWN;
+    // JsonType type = JsonType::UNKNOWN;
+    std::vector<JsonType> type;
     std::string name;
     bool hasEnum = false;
 
@@ -105,6 +108,7 @@ private:
     std::vector<JSTNode *> placeholders;
     ASTNode *defs = nullptr;
     JSTNode *getPlaceHolder(const std::string &name);
+    void handleType(ASTNode *node, JSTNode *jNode);
 };
 
 #endif

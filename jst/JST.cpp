@@ -36,12 +36,12 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
     }
     case AST_STRING:
     {
-        printf("String: %s\n", node->string_value);
+        // printf("String: %s\n", node->string_value);
         return;
     }
     case AST_NUMBER:
     {
-        printf("Number: %s\n", node->string_value);
+        // printf("Number: %s\n", node->string_value);
         return;
     }
     case AST_PAIR:
@@ -109,7 +109,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
         else if (std::string(node->key).compare("docHint") == 0) { return; }
         else if (std::string(node->key).compare("type") == 0) // TODO: Handle multiple types ex. "type": ["array", "null"]
         {
-            jNode->type = JsonType(node->children[0]->string_value);
+            handleType(node->children[0], jNode);
             return;
         }
         else if (std::string(node->key).compare("properties") == 0) { break; }
@@ -118,7 +118,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
         {
             // Change parents name from items to whatever string_value is
             jNode->name = node->children[0]->string_value;
-            jNode->type = JsonType::UNKNOWN;
+            jNode->type.push_back(JsonType::UNKNOWN);
             placeholders.push_back(jNode);
 
             return;
@@ -178,6 +178,21 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
     }
 }
 
+void JstGenerator::handleType(ASTNode *node, JSTNode *jNode)
+{
+    if (node->type == AST_STRING) // Handle "type" : "number"
+    {
+        jNode->type.push_back(JsonType(node->string_value));
+    }
+    else if (node->type == AST_ARRAY) // Handle "type" : ["number"]
+    {
+        for (int i = 0; i < node->child_count; i++)
+        {
+            jNode->type.push_back(JsonType(node->children[i]->string_value));
+        }
+    }
+}
+
 JSTNode *JstGenerator::getPlaceHolder(const std::string &name)
 {
     for (auto iter = placeholders.begin(); iter != placeholders.end();)
@@ -222,7 +237,14 @@ void JstGenerator::print_jst(const JSTNode *const node, int indent)
     std::string space;
     for (int i = 0; i < indent; ++i) space += '\t';
 
-    std::cout << space << node->type.toString() << ' ' << node->name << ' ' << node << '\n';
+    std::cout << space;
+    for (uint64_t i = 0; i < node->type.size(); i++)
+    {
+        const auto &type = node->type.at(i);
+        std::cout << type.toString();
+        if (i < node->type.size() - 1) { std::cout << ','; }
+    }
+    std::cout << ' ' << node->name << ' ' << node << '\n';
     for (const auto &child : node->children)
     {
         print_jst(child.get(), indent + 1);

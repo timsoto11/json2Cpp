@@ -5,7 +5,7 @@
 #include "cppGen.hpp"
 #include "parser.h"
 
-ASTNode *root;
+ASTNode *root; // parser.c expects this to be a global
 
 int main()
 {

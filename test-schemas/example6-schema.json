@@ -1,0 +1,159 @@
+{
+    "$id": "https://example.com/complex.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Complex Test Schema",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": [
+                "string",
+                "integer"
+            ],
+            "description": "Can be a string or an integer for testing union types"
+        },
+        "meta": {
+            "$ref": "#/$defs/metaObject"
+        },
+        "config": {
+            "type": "object",
+            "properties": {
+                "mode": {
+                    "enum": [
+                        "basic",
+                        "advanced",
+                        "experimental"
+                    ]
+                },
+                "retryCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 3
+                },
+                "enableFeatureX": {
+                    "type": "boolean",
+                    "const": true
+                }
+            },
+            "required": [
+                "mode"
+            ]
+        },
+        "tags": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "uniqueItems": true
+        },
+        "matrix": {
+            "type": "array",
+            "items": {
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            }
+        },
+        "tupleExample": {
+            "type": "array",
+            "items": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                }
+            ],
+            "additionalItems": false
+        },
+        "dynamicObject": {
+            "type": "object",
+            "patternProperties": {
+                "^item_[0-9]+$": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": {
+                "$ref": "#/$defs/simpleValue"
+            }
+        },
+        "conditionalField": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "enum": [
+                        "A",
+                        "B"
+                    ]
+                }
+            },
+            "required": [
+                "kind"
+            ],
+            "if": {
+                "properties": {
+                    "kind": {
+                        "const": "A"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "valueA": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "valueA"
+                ]
+            },
+            "else": {
+                "properties": {
+                    "valueB": {
+                        "type": "number"
+                    }
+                },
+                "required": [
+                    "valueB"
+                ]
+            }
+        },
+        "multiTypeField": {
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "combinedConstraint": {
+            "allOf": [
+                {
+                    "type": "number",
+                    "minimum": 10
+                },
+                {
+                    "type": "number",
+                    "maximum": 100
+                }
+            ]
+        },
+        "looseObject": {
+            "type": "object",
+            "additionalProperties": true
+        }
+    }
+}
