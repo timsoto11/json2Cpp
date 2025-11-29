@@ -38,8 +38,7 @@ generator::generator(ASTNode *node)
     {
         fs << str << '\n';
     }
-
-    fs << '\n';
+    if (!variantStrings.empty()) { fs << '\n'; }
 
     for (const auto &str : structStrings)
     {
