@@ -69,7 +69,6 @@ void generator::generateStruct(JSTNode *node)
     {
         if (child->type.size() > 1)
         {
-            std::cout << "We need to handle a variant. " << child->name << '\n';
             std::string varStr = "using " + underscoreToCamelCase(child->name) + " = std::variant<";
             for (size_t i = 0; i < child->type.size(); i++)
             {

@@ -183,6 +183,9 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
     }
 }
 
+/* For Type each JSON node has a vector with the 0th index initialized to UNKNOWN
+ * So we have to make sure we overwrite that first before adding to the vector.
+ */
 void JstGenerator::handleType(ASTNode *node, JSTNode *jNode)
 {
     if (node->type == AST_STRING) // Handle "type" : "number"
