@@ -85,11 +85,13 @@ private:
 class JSTNode
 {
 public:
+    explicit JSTNode(JSTNode *p) : parent(p) {}
     // JsonType type = JsonType::UNKNOWN;
     std::vector<JsonType> type{JsonType()};
     std::string name;
     bool hasEnum = false;
 
+    JSTNode *parent = nullptr;
     std::vector<std::unique_ptr<JSTNode>> children;
     int64_t minimum = std::numeric_limits<int64_t>::min();
     int64_t maximum = std::numeric_limits<int64_t>::max();
@@ -105,10 +107,12 @@ public:
 private:
     void generateJST(ASTNode *node, JSTNode *cstNode);
     void handlePlaceholders();
-    std::vector<JSTNode *> placeholders;
-    ASTNode *defs = nullptr;
+    void prunePlaceholders();
     JSTNode *getPlaceHolder(const std::string &name);
     void handleType(ASTNode *node, JSTNode *jNode);
+
+    std::vector<JSTNode *> placeholders;
+    ASTNode *defs = nullptr;
 };
 
 #endif

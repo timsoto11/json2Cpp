@@ -7,11 +7,16 @@
 
 std::unique_ptr<JSTNode> JstGenerator::generateJST(ASTNode *node)
 {
-    auto root = std::make_unique<JSTNode>();
+    auto root = std::make_unique<JSTNode>(nullptr);
     root->name = "settings";
 
     generateJST(node, root.get());
     handlePlaceholders();
+    if (placeholders.empty() == false)
+    {
+        std::cout << "Unresolvable references.\n";
+        prunePlaceholders();
+    }
 
     // std::cout << "\n\n\n";
     // print_jst(root.get(), 0);
@@ -163,7 +168,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
                 continue;
             }
 
-            jNode->children.push_back({std::make_unique<JSTNode>()});
+            jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
             auto &child = jNode->children.back();
             child->name = tmpName;
 
@@ -232,6 +237,25 @@ void JstGenerator::handlePlaceholders()
             {
                 generateJST(defs->children[0]->children[i]->children[j], jstParent);
             }
+        }
+    }
+}
+
+// This goes through the unresolved placeholders and removes from the Json tree we've built.
+void JstGenerator::prunePlaceholders()
+{
+    for (auto iter = placeholders.begin(); iter != placeholders.end(); iter++)
+    {
+        auto parent = (*iter)->parent;
+        auto childPtrToRemove = *iter;
+        for (auto child = parent->children.begin(); child != parent->children.end();)
+        {
+            if (child->get() == childPtrToRemove)
+            {
+                child = parent->children.erase(child);
+                continue;
+            }
+            child++;
         }
     }
 }
