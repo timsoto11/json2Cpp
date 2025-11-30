@@ -19,10 +19,11 @@ private:
     std::vector<std::string> variantStrings;
     std::vector<std::string> enumsStrings;
     std::vector<std::string> structStrings;
+    std::map<std::string, const JSTNode *> map;
 
     void generateStruct(JSTNode *node);
-
-    std::map<std::string, const JSTNode *> map;
+    void handleVariants(std::string &structStr, JSTNode *node);
+    void handleEnums(std::string &structStr, JSTNode *node);
 
     static std::string handleInts(const JSTNode &node, const uint32_t index);
     static std::string toString(const JSTNode &node, const uint32_t index = 0);

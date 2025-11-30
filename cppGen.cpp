@@ -69,21 +69,17 @@ void generator::generateStruct(JSTNode *node)
     {
         if (child->type.size() > 1)
         {
-            std::string varStr = "using " + underscoreToCamelCase(child->name) + " = std::variant<";
-            for (size_t i = 0; i < child->type.size(); i++)
-            {
-                varStr += toString(*child, i);
-                if (i < child->type.size() - 1) { varStr += ", "; }
-            }
-            varStr += ">;";
-            variantStrings.push_back(varStr);
-            structStr += "\t" + underscoreToCamelCase(child->name) + ' ' + child->name + ";\n";
+            handleVariants(structStr, child.get());
             continue;
         }
-        if (child->type.at(0) == JsonType::ENUM) { continue; }
 
         // At this point there is only one type
-        if (child->type.at(0) == JsonType::OBJECT)
+        if (child->type.at(0) == JsonType::ENUM)
+        {
+            handleEnums(structStr, child.get());
+            continue;
+        }
+        else if (child->type.at(0) == JsonType::OBJECT)
         {
             generateStruct(child.get());
             structStr += "\t" + underscoreToCamelCase(child->name) + ' ' + child->name + ";\n";
@@ -108,6 +104,33 @@ void generator::generateStruct(JSTNode *node)
     }
     structStr += "};\n";
     structStrings.push_back(structStr);
+}
+
+void cpp::generator::handleVariants(std::string &structStr, JSTNode *node)
+{
+    std::string varStr = "using " + underscoreToCamelCase(node->name) + " = std::variant<";
+    for (size_t i = 0; i < node->type.size(); i++)
+    {
+        varStr += toString(*node, i);
+        if (i < node->type.size() - 1) { varStr += ", "; }
+    }
+    varStr += ">;";
+    variantStrings.push_back(varStr);
+    structStr += "\t" + underscoreToCamelCase(node->name) + ' ' + node->name + ";\n";
+}
+
+void cpp::generator::handleEnums(std::string &structStr, JSTNode *node)
+{
+    auto type = node->children.at(0)->type.at(0);
+    for (auto iter = node->children.begin(); iter != node->children.end(); iter++)
+    {
+        if ((*iter)->type.at(0) != type)
+        {
+            // TODO: We still need to handle enum with multiple types
+            return;
+        }
+    }
+    structStr += "\t" + toString(*node->children.at(0)) + ' ' + node->name + "; // Need to create type for enum.\n";
 }
 
 std::string cpp::generator::handleInts(const JSTNode &node, const uint32_t index)
@@ -150,7 +173,7 @@ std::string generator::toString(const JSTNode &node, const uint32_t index)
     switch (node.type.at(index))
     {
     case JsonType::UNKNOWN:
-        return "Unknown";
+        return "// Unknown";
     case JsonType::STRING:
         return "std::string";
     case JsonType::OBJECT:
