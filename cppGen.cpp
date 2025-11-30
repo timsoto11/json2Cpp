@@ -80,6 +80,9 @@ void generator::generateStruct(JSTNode *node)
             structStr += "\t" + underscoreToCamelCase(child->name) + ' ' + child->name + ";\n";
             continue;
         }
+        if (child->type.at(0) == JsonType::ENUM) { continue; }
+
+        // At this point there is only one type
         if (child->type.at(0) == JsonType::OBJECT)
         {
             generateStruct(child.get());

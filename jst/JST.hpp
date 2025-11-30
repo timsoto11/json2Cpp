@@ -21,7 +21,8 @@ public:
         INTEGER,
         NUMBER,
         BOOL,
-        ARRAY
+        ARRAY,
+        NULLTYPE
     };
 
     JsonType() = default;

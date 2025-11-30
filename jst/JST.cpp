@@ -36,17 +36,29 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
     }
     case AST_ARRAY:
     {
-        // printf("AST_ARRAY\n");
+        // if (jNode->type.at(0) == JsonType::ENUM) { printf("AST_ARRAY\n"); }
         break;
     }
     case AST_STRING:
     {
-        // printf("String: %s\n", node->string_value);
+        if (jNode->type.at(0) == JsonType::ENUM)
+        {
+            // printf("String: %s\n", node->string_value);
+            jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
+            jNode->children.back()->type.at(0) = JsonType::STRING;
+            jNode->children.back()->name = node->string_value;
+        }
         return;
     }
     case AST_NUMBER:
     {
-        // printf("Number: %s\n", node->string_value);
+        if (jNode->type.at(0) == JsonType::ENUM)
+        {
+            // printf("Number: %s\n", node->string_value);
+            jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
+            jNode->children.back()->type.at(0) = JsonType::NUMBER;
+            jNode->children.back()->name = node->string_value;
+        }
         return;
     }
     case AST_PAIR:
@@ -67,7 +79,9 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
         else if (std::string(node->key).compare("enum") == 0)
         {
             jNode->hasEnum = true;
-            return;
+            jNode->type.at(0) = JsonType("enum");
+            break;
+            // return;
         }
         else if (std::string(node->key).compare("title") == 0) { return; }
         else if (std::string(node->key).compare("$comment") == 0) { return; }
@@ -134,17 +148,35 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
     }
     case AST_BOOLEAN:
     {
-        printf("Boolean: %s\n", node->string_value);
+        if (jNode->type.at(0) == JsonType::ENUM)
+        {
+            // printf("Boolean: %s\n", node->string_value);
+            jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
+            jNode->children.back()->type.at(0) = JsonType::BOOL;
+            jNode->children.back()->name = node->string_value;
+        }
         return;
     }
     case AST_INTEGER:
     {
-        printf("Integer: %s\n", node->string_value);
+        if (jNode->type.at(0) == JsonType::ENUM)
+        {
+            // printf("Integer: %s\n", node->string_value);
+            jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
+            jNode->children.back()->type.at(0) = JsonType::INTEGER;
+            jNode->children.back()->name = node->string_value;
+        }
         return;
     }
     case AST_NULL:
     {
-        printf("NULL: %s\n", node->string_value);
+        if (jNode->type.at(0) == JsonType::ENUM)
+        {
+            // printf("NULL: %s\n", node->string_value);
+            jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
+            jNode->children.back()->type.at(0) = JsonType::NULLTYPE;
+            jNode->children.back()->name = node->string_value;
+        }
         return;
     }
     default:
@@ -155,7 +187,9 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
     }
     for (int i = 0; i < node->child_count; ++i)
     {
-        if (node->type == AST_PAIR && std::string(node->key).compare("properties") != 0)
+        if (node->type == AST_PAIR &&
+            std::string(node->key).compare("properties") != 0 &&
+            std::string(node->key).compare("enum") != 0)
         {
             const auto tmpName = std::string(node->key);
             // std::cout << tmpName << " is a child of " << jNode->name << '\n';
