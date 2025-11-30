@@ -87,14 +87,14 @@ void generator::generateStruct(JSTNode *node)
         else if (child->type.at(0) == JsonType::ARRAY)
         {
             // If the type is an object we need to generate a struct, otherwise this is a vector of something already defined (int, std::string...)
-            if (child->children[0]->type.at(0) != JsonType::OBJECT)
-            {
-                structStr += "\t" + toString(*child) + '<' + toString(*(child->children[0])) + "> " + child->name + ";\n";
-            }
-            else
+            if (child->children[0]->type.at(0) == JsonType::OBJECT)
             {
                 generateStruct(child->children[0].get()); // Generate struct first because it may change child->name, if duplicates are found
                 structStr += "\t" + toString(*child) + '<' + underscoreToCamelCase(child->children[0]->name) + "> " + child->name + ";\n";
+            }
+            else
+            {
+                structStr += "\t" + toString(*child) + '<' + printVector(*child) + "> " + child->name + ";\n";
             }
         }
         else
@@ -104,6 +104,30 @@ void generator::generateStruct(JSTNode *node)
     }
     structStr += "};\n";
     structStrings.push_back(structStr);
+}
+
+std::string generator::printVector(const JSTNode &node)
+{
+    std::string ret;
+    auto child = node.children[0].get();
+    auto childType = child->type.at(0);
+    int i = 0;
+    while (childType == JsonType::ARRAY)
+    {
+        ret += "std::vector<";
+        i++;
+        child = child->children[0].get();
+        childType = child->type.at(0);
+    }
+
+    ret += toString(*child);
+
+    while (i)
+    {
+        ret += '>';
+        i--;
+    }
+    return ret;
 }
 
 void cpp::generator::handleVariants(std::string &structStr, JSTNode *node)
