@@ -24,7 +24,7 @@ private:
     void generateStruct(JSTNode *node);
     void handleVariants(std::string &structStr, JSTNode *node);
     void handleEnums(std::string &structStr, JSTNode *node);
-    std::string printVector(const JSTNode &node);
+    std::string printVectorObject(const JSTNode &node);
 
     static std::string handleInts(const JSTNode &node, const uint32_t index);
     static std::string toString(const JSTNode &node, const uint32_t index = 0);

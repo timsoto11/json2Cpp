@@ -94,7 +94,7 @@ void generator::generateStruct(JSTNode *node)
             }
             else
             {
-                structStr += "\t" + toString(*child) + '<' + printVector(*child) + "> " + child->name + ";\n";
+                structStr += "\t" + toString(*child) + '<' + printVectorObject(*child) + "> " + child->name + ";\n";
             }
         }
         else
@@ -106,27 +106,26 @@ void generator::generateStruct(JSTNode *node)
     structStrings.push_back(structStr);
 }
 
-std::string generator::printVector(const JSTNode &node)
+std::string generator::printVectorObject(const JSTNode &node)
 {
     std::string ret;
+    std::string closingAndleBrackets;
     auto child = node.children[0].get();
     auto childType = child->type.at(0);
-    int i = 0;
+
     while (childType == JsonType::ARRAY)
     {
         ret += "std::vector<";
-        i++;
+        closingAndleBrackets += '>';
+
         child = child->children[0].get();
         childType = child->type.at(0);
     }
 
     ret += toString(*child);
 
-    while (i)
-    {
-        ret += '>';
-        i--;
-    }
+    ret += closingAndleBrackets;
+
     return ret;
 }
 
