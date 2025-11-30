@@ -14,15 +14,15 @@ class JsonType
 public:
     enum JSON_TYPES : uint8_t
     {
-        UNKNOWN,
-        OBJECT,
-        STRING,
-        ENUM,
-        INTEGER,
-        NUMBER,
-        BOOL,
-        ARRAY,
-        NULLTYPE
+        UNKNOWN = 0,
+        OBJECT = 1u << 0,
+        STRING = 1u << 1,
+        ENUM = 1u << 2,
+        INTEGER = 1u << 3,
+        NUMBER = 1u << 4,
+        BOOL = 1u << 5,
+        ARRAY = 1u << 6,
+        NULLTYPE = 1u << 7,
     };
 
     JsonType() = default;
@@ -48,35 +48,42 @@ public:
     // Prevent usage: if(OPERATION_MODE)
     explicit operator bool() const = delete;
 
-    constexpr bool operator==(const JsonType a) const { return value == a.value; }
-    constexpr bool operator!=(const JsonType a) const { return value != a.value; }
+    constexpr bool operator==(const JsonType a) const { return value & a.value; }
+    constexpr bool operator!=(const JsonType a) const { return !(value & a.value); }
+    constexpr bool operator==(const JSON_TYPES a) const { return value & a; }
+    constexpr bool operator!=(const JSON_TYPES a) const { return !(value & a); }
     // friend std::ostream &operator<<(std::ostream &os, const JsonType &a) { return os << a.toString(); }
 
-    constexpr bool operator==(const JSON_TYPES a) const { return value == a; }
-    constexpr bool operator!=(const JSON_TYPES a) const { return value != a; }
+    JsonType &operator+=(const JsonType &rhs)
+    {
+        value = static_cast<JSON_TYPES>(this->value | rhs.value);
+        return *this;
+    }
+
+    friend JsonType operator+(JsonType lhs, const JsonType &rhs)
+    {
+        lhs += rhs;
+        return lhs;
+    }
+
+    int numberOfTypes() const
+    {
+        return __builtin_popcount(value);
+    }
 
     std::string toString() const
     {
-        switch (value)
-        {
-        case UNKNOWN:
-            return "Unknown";
-        case STRING:
-            return "STRING";
-        case OBJECT:
-            return "OBJECT";
-        case ENUM:
-            return "ENUM";
-        case INTEGER:
-            return "INTEGER";
-        case NUMBER:
-            return "NUMBER";
-        case BOOL:
-            return "BOOL";
-        case ARRAY:
-            return "ARRAY";
-        }
-        return ""; // unreachable
+        std::string ret;
+        if (value == 0) ret += "Unknown ";
+        if (value & (1 << 0)) ret += "OBJECT ";
+        if (value & (1 << 1)) ret += "STRING ";
+        if (value & (1 << 2)) ret += "ENUM ";
+        if (value & (1 << 3)) ret += "INTEGER ";
+        if (value & (1 << 4)) ret += "NUMBER ";
+        if (value & (1 << 5)) ret += "BOOL ";
+        if (value & (1 << 6)) ret += "ARRAY ";
+        if (value & (1 << 7)) ret += "NULL ";
+        return ret;
     }
 
 private:
@@ -87,8 +94,7 @@ class JSTNode
 {
 public:
     explicit JSTNode(JSTNode *p) : parent(p) {}
-    // JsonType type = JsonType::UNKNOWN;
-    std::vector<JsonType> type{JsonType()};
+    JsonType type;
     std::string name;
     bool hasEnum = false;
 

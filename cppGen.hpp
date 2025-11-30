@@ -26,8 +26,11 @@ private:
     void handleEnums(std::string &structStr, JSTNode *node);
     std::string printVectorObject(const JSTNode &node);
 
-    static std::string handleInts(const JSTNode &node, const uint32_t index);
-    static std::string toString(const JSTNode &node, const uint32_t index = 0);
+    static std::string handleInts(const int64_t &min = std::numeric_limits<int64_t>::min(),
+                                  const int64_t &max = std::numeric_limits<int64_t>::max());
+    static std::string toString(const JsonType &type,
+                                const int64_t &min = std::numeric_limits<int64_t>::min(),
+                                const int64_t &max = std::numeric_limits<int64_t>::max());
 };
 }
 

@@ -41,22 +41,22 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
     }
     case AST_STRING:
     {
-        if (jNode->type.at(0) == JsonType::ENUM)
+        if (jNode->type == JsonType::ENUM)
         {
             // printf("String: %s\n", node->string_value);
             jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
-            jNode->children.back()->type.at(0) = JsonType::STRING;
+            jNode->children.back()->type = JsonType::STRING;
             jNode->children.back()->name = node->string_value;
         }
         return;
     }
     case AST_NUMBER:
     {
-        if (jNode->type.at(0) == JsonType::ENUM)
+        if (jNode->type == JsonType::ENUM)
         {
             // printf("Number: %s\n", node->string_value);
             jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
-            jNode->children.back()->type.at(0) = JsonType::NUMBER;
+            jNode->children.back()->type = JsonType::NUMBER;
             jNode->children.back()->name = node->string_value;
         }
         return;
@@ -79,7 +79,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
         else if (std::string(node->key).compare("enum") == 0)
         {
             jNode->hasEnum = true;
-            jNode->type.at(0) = JsonType("enum");
+            jNode->type = JsonType::ENUM;
             break;
             // return;
         }
@@ -137,7 +137,6 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
         {
             // Change parents name from items to whatever string_value is
             jNode->name = node->children[0]->string_value;
-            jNode->type.push_back(JsonType::UNKNOWN);
             placeholders.push_back(jNode);
 
             return;
@@ -148,33 +147,33 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
     }
     case AST_BOOLEAN:
     {
-        if (jNode->type.at(0) == JsonType::ENUM)
+        if (jNode->type == JsonType::ENUM)
         {
             // printf("Boolean: %s\n", node->string_value);
             jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
-            jNode->children.back()->type.at(0) = JsonType::BOOL;
+            jNode->children.back()->type = JsonType::BOOL;
             jNode->children.back()->name = node->string_value;
         }
         return;
     }
     case AST_INTEGER:
     {
-        if (jNode->type.at(0) == JsonType::ENUM)
+        if (jNode->type == JsonType::ENUM)
         {
             // printf("Integer: %s\n", node->string_value);
             jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
-            jNode->children.back()->type.at(0) = JsonType::INTEGER;
+            jNode->children.back()->type = JsonType::INTEGER;
             jNode->children.back()->name = node->string_value;
         }
         return;
     }
     case AST_NULL:
     {
-        if (jNode->type.at(0) == JsonType::ENUM)
+        if (jNode->type == JsonType::ENUM)
         {
             // printf("NULL: %s\n", node->string_value);
             jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
-            jNode->children.back()->type.at(0) = JsonType::NULLTYPE;
+            jNode->children.back()->type = JsonType::NULLTYPE;
             jNode->children.back()->name = node->string_value;
         }
         return;
@@ -224,17 +223,13 @@ void JstGenerator::handleType(ASTNode *node, JSTNode *jNode)
 {
     if (node->type == AST_STRING) // Handle "type" : "number"
     {
-        jNode->type.at(0) = JsonType(node->string_value);
+        jNode->type = JsonType(node->string_value);
     }
     else if (node->type == AST_ARRAY) // Handle "type" : ["number"]
     {
         for (int i = 0; i < node->child_count; i++)
         {
-            if (i == 0) { jNode->type.at(0) = JsonType(node->children[i]->string_value); }
-            else
-            {
-                jNode->type.push_back(JsonType(node->children[i]->string_value));
-            }
+            jNode->type += JsonType(node->children[i]->string_value);
         }
     }
 }
@@ -299,16 +294,8 @@ void JstGenerator::prunePlaceholders()
 
 void JstGenerator::print_jst(const JSTNode *const node, int indent)
 {
-    std::string space;
-    for (int i = 0; i < indent; ++i) space += '\t';
-
-    std::cout << space;
-    for (uint64_t i = 0; i < node->type.size(); i++)
-    {
-        const auto &type = node->type.at(i);
-        std::cout << type.toString();
-        if (i < node->type.size() - 1) { std::cout << ','; }
-    }
+    for (int i = 0; i < indent; ++i) std::cout << '\t';
+    std::cout << node->type.toString();
     std::cout << ' ' << node->name << ' ' << node << '\n';
     for (const auto &child : node->children)
     {
