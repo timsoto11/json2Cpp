@@ -132,6 +132,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
             return;
         }
         else if (std::string(node->key).compare("properties") == 0) { break; }
+        else if (std::string(node->key).compare("patternProperties") == 0) { break; }
         else if (std::string(node->key).compare("additionalProperties") == 0) { return; }
         else if (std::string(node->key).compare("$ref") == 0)
         {
@@ -188,6 +189,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
     {
         if (node->type == AST_PAIR &&
             std::string(node->key).compare("properties") != 0 &&
+            std::string(node->key).compare("patternProperties") != 0 &&
             std::string(node->key).compare("enum") != 0)
         {
             const auto tmpName = std::string(node->key);
@@ -207,6 +209,35 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
 
             // std::cout << child.name << "(" << &child << ')' << " of " << jNode->name << "(" << &jNode << ')' << '\n';
             generateJST(node->children[i], jNode->children.back().get());
+        }
+        else if (node->type == AST_PAIR &&
+                 std::string(node->key).compare("patternProperties") == 0)
+        {
+            /* For pattern properties we're going to create the JSON tree such that both
+             * key and value are variables. This is because when parsing the JSON the key
+             * may hold information that needs to be known at runtime.
+             */
+            jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
+            auto &child = jNode->children.back();
+            child->type = JsonType::ARRAY;
+            child->name = "items" + std::to_string(++dynamicPatternsCounter);
+            child->children.push_back({std::make_unique<JSTNode>(jNode)});
+            auto &newChild1 = child->children.back();
+            newChild1->type = JsonType::OBJECT;
+            newChild1->name = child->name;
+            newChild1->children.push_back({std::make_unique<JSTNode>(jNode)});
+            auto &newChild2 = newChild1->children.back();
+            newChild2->type = JsonType::STRING;
+            newChild2->name = "key";
+
+            // Now we need to add the fields that object that corresponds to the dynamic object
+            newChild1->children.push_back({std::make_unique<JSTNode>(jNode)});
+            auto &newChild3 = newChild1->children.back();
+            newChild3->name = "value";
+
+            // TODO: FIX THIS UNSAFE MADNESS
+            generateJST(node->children[i]->children[0]->children[0]->children[0], newChild1->children.back().get());
+            // print_ast(node, 0);
         }
         else
         {
@@ -296,7 +327,7 @@ void JstGenerator::print_jst(const JSTNode *const node, int indent)
 {
     for (int i = 0; i < indent; ++i) std::cout << '\t';
     std::cout << node->type.toString();
-    std::cout << ' ' << node->name << ' ' << node << '\n';
+    std::cout << ' ' << node->name << '\n';
     for (const auto &child : node->children)
     {
         print_jst(child.get(), indent + 1);

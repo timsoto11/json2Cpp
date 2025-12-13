@@ -58,7 +58,8 @@ void generator::generateStruct(JSTNode *node)
         // node->name = node->parent->name + '_' + grandParent;
         // node->parent->name = node->parent->name + '_' + grandParent;
     }
-    else {
+    else
+    {
         map.insert({node->name, node});
     }
 
@@ -86,6 +87,7 @@ void generator::generateStruct(JSTNode *node)
         }
         else if (child->type == JsonType::ARRAY)
         {
+            if (child->children.empty()) { throw std::runtime_error("Invalid tree."); }
             // If the type is an object we need to generate a struct, otherwise this is a vector of something already defined (int, std::string...)
             if (child->children[0]->type == JsonType::OBJECT)
             {
@@ -118,11 +120,18 @@ std::string generator::printVectorObject(const JSTNode &node)
         ret += "std::vector<";
         closingAndleBrackets += '>';
 
-        child = child->children[0].get();
-        childType = child->type;
+        if (child->children.size() == 0)
+        {
+            childType = JsonType::UNKNOWN;
+        }
+        else
+        {
+            child = child->children.at(0).get();
+            childType = child->type;
+        }
     }
 
-    ret += toString(child->type);
+    ret += toString(childType);
 
     ret += closingAndleBrackets;
 

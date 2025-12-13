@@ -37,7 +37,8 @@ public:
         else if (s == "number") { value = JsonType::NUMBER; }
         else if (s == "boolean") { value = JsonType::BOOL; }
         else if (s == "array") { value = JsonType::ARRAY; }
-        else {
+        else
+        {
             value = JsonType::UNKNOWN;
         }
     }
@@ -120,6 +121,7 @@ private:
 
     std::vector<JSTNode *> placeholders;
     ASTNode *defs = nullptr;
+    uint32_t dynamicPatternsCounter = 0;
 };
 
 #endif
