@@ -229,7 +229,7 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
             auto &newChild2 = newChild1->children.back();
             newChild2->type = JsonType::STRING;
             newChild2->name = "key";
-
+            newChild2->regex = node->children[i]->children[0]->key;
             // Now we need to add the fields that object that corresponds to the dynamic object
             newChild1->children.push_back({std::make_unique<JSTNode>(jNode)});
             auto &newChild3 = newChild1->children.back();

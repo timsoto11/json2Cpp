@@ -103,6 +103,7 @@ public:
     std::vector<std::unique_ptr<JSTNode>> children;
     int64_t minimum = std::numeric_limits<int64_t>::min();
     int64_t maximum = std::numeric_limits<int64_t>::max();
+    std::string regex;
 };
 
 class JstGenerator
