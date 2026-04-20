@@ -48,19 +48,9 @@ generator::generator(ASTNode *node)
 
 void generator::generateStruct(JSTNode *node)
 {
-    auto search = map.find(node->name);
-    if (search != map.end())
+    if (checkIfNameIsUnique(node) == false)
     {
-        // Check if identical to found node
-        if (sameNode(search->second, node) == true) { return; }
-
-        // const std::string grandParent = node->parent->parent->name;
-        // node->name = node->parent->name + '_' + grandParent;
-        // node->parent->name = node->parent->name + '_' + grandParent;
-    }
-    else
-    {
-        map.insert({node->name, node});
+        throw std::runtime_error("Duplicate name found: " + node->name);
     }
 
     std::string structStr;
@@ -173,7 +163,7 @@ void cpp::generator::handleEnums(std::string &structStr, JSTNode *node)
             return;
         }
     }
-    structStr += "\t" + toString(node->children.at(0)->type) + ' ' + node->name + "; // Need to create type for enum.\n";
+    structStr += "\t" + toString(node->children.at(0)->type) + ' ' + node->name + "; // JSON Enum of one type. Check at runtime for valid values.\n";
 }
 
 std::string cpp::generator::handleInts(const int64_t &min, const int64_t &max)
@@ -228,4 +218,24 @@ std::string cpp::generator::toString(const JsonType &type, const int64_t &min, c
         return "std::vector";
     }
     return "// Unknown";
+}
+
+bool cpp::generator::checkIfNameIsUnique(JSTNode *node)
+{
+    auto search = map.find(node->name);
+    if (search != map.end())
+    {
+        // Check if identical to found node
+        if (sameNode(search->second, node) == true) { return false; }
+
+        // const std::string grandParent = node->parent->parent->name;
+        // node->name = node->parent->name + '_' + grandParent;
+        // node->parent->name = node->parent->name + '_' + grandParent;
+    }
+    else
+    {
+        map.insert({node->name, node});
+    }
+
+    return true;
 }

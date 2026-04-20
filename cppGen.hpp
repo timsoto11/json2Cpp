@@ -31,6 +31,8 @@ private:
     static std::string toString(const JsonType &type,
                                 const int64_t &min = std::numeric_limits<int64_t>::min(),
                                 const int64_t &max = std::numeric_limits<int64_t>::max());
+
+    bool checkIfNameIsUnique(JSTNode *node);
 };
 }
 
