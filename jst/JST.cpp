@@ -1,9 +1,82 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <string_view>
+#include <unordered_map>
 
 #include "JST.hpp"
 #include "ast.h"
+
+enum class TokenType
+{
+    DEPENDENT_REQUIRED,
+    SCHEMA,
+    ID,
+    REQUIRED,
+    ENUM,
+    TITLE,
+    DEFAULT,
+    COMMENT,
+    ITEMS,
+    PATTERN,
+    ONE_OF,
+    MINIMUM,
+    MAXIMUM,
+    MIN_LENGTH,
+    MAX_LENGTH,
+    MIN_ITEMS,
+    MAX_ITEMS,
+    DESCRIPTION,
+    DOC_HINT,
+    TYPE,
+    PROPERTIES,
+    PATTERN_PROPERTIES,
+    ADDITIONAL_PROPERTIES,
+    REF,
+    // DEFS,
+    IF,
+    ELSE,
+    THEN,
+    NOT_A_KEYWORD
+};
+
+static TokenType GetKeywordToken(std::string_view token)
+{
+    static const std::unordered_map<std::string_view, TokenType> keywords = {
+        {"dependentRequired", TokenType::DEPENDENT_REQUIRED},
+        {"$schema", TokenType::SCHEMA},
+        {"$id", TokenType::ID},
+        {"required", TokenType::REQUIRED},
+        {"enum", TokenType::ENUM},
+        {"title", TokenType::TITLE},
+        {"default", TokenType::DEFAULT},
+        {"$comment", TokenType::COMMENT},
+        {"items", TokenType::ITEMS},
+        {"pattern", TokenType::PATTERN},
+        {"oneOf", TokenType::ONE_OF},
+        {"minimum", TokenType::MINIMUM},
+        {"maximum", TokenType::MAXIMUM},
+        {"minLength", TokenType::MIN_LENGTH},
+        {"maxLength", TokenType::MAX_LENGTH},
+        {"minItems", TokenType::MIN_ITEMS},
+        {"maxItems", TokenType::MAX_ITEMS},
+        {"description", TokenType::DESCRIPTION},
+        {"docHint", TokenType::DOC_HINT},
+        {"type", TokenType::TYPE},
+        {"properties", TokenType::PROPERTIES},
+        {"patternProperties", TokenType::PATTERN_PROPERTIES},
+        {"additionalProperties", TokenType::ADDITIONAL_PROPERTIES},
+        {"$ref", TokenType::REF},
+        // {"$defs", TokenType::DEFS}, // not sure what to do with this yet.
+        {"if", TokenType::IF},
+        {"else", TokenType::ELSE},
+        {"then", TokenType::THEN}
+
+    };
+
+    auto it = keywords.find(token);
+    return it != keywords.end() ? it->second : TokenType::NOT_A_KEYWORD;
+}
 
 std::unique_ptr<JSTNode> JstGenerator::generateJST(ASTNode *node)
 {
@@ -63,94 +136,79 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
     }
     case AST_PAIR:
     {
-        // TODO: need to manage what can be a variable name. Right now nothing can be named dependentRequired
-
-        // Need to put these into a map and benchmark. This is probably pretty SLOW.
-        if (std::string(node->key).compare("dependentRequired") == 0) { return; }
-        else if (std::string(node->key).compare("$schema") == 0) { return; }
-        else if (std::string(node->key).compare("$id") == 0) { return; }
-        else if (std::string(node->key).compare("required") == 0) { return; }
-        else if (std::string(node->key).compare("enum") == 0)
+        TokenType token = GetKeywordToken(node->key);
+        switch (token)
         {
+        case TokenType::DEPENDENT_REQUIRED:
+            return;
+        case TokenType::SCHEMA:
+            return;
+        case TokenType::ID:
+            return;
+        case TokenType::REQUIRED:
+            return;
+        case TokenType::ENUM:
             jNode->hasEnum = true;
             jNode->type = JsonType::ENUM;
             break;
-            // return;
-        }
-        else if (std::string(node->key).compare("title") == 0) { return; }
-        else if (std::string(node->key).compare("$comment") == 0) { return; }
-        else if (std::string(node->key).compare("default") == 0) { return; }
-        else if (std::string(node->key).compare("description") == 0) { return; }
-        else if (std::string(node->key).compare("items") == 0) { break; }
-        else if (std::string(node->key).compare("pattern") == 0) { return; }
-        else if (std::string(node->key).compare("oneOf") == 0)
-        {
+        case TokenType::TITLE:
+            return;
+        case TokenType::COMMENT:
+            return;
+        case TokenType::DEFAULT:
+            return;
+        case TokenType::ITEMS:
+            break;
+        case TokenType::PATTERN:
+            return;
+        case TokenType::ONE_OF:
             jNode->hasEnum = true;
             return;
-        }
-        else if (std::string(node->key).compare("minimum") == 0)
-        {
+        case TokenType::MINIMUM:
             jNode->minimum = std::stoi(node->children[0]->string_value);
             return;
-        }
-        else if (std::string(node->key).compare("maximum") == 0)
-        {
+        case TokenType::MAXIMUM:
             jNode->maximum = std::stoi(node->children[0]->string_value);
             return;
-        }
-        else if (std::string(node->key).compare("minLength") == 0)
-        {
+        case TokenType::MIN_LENGTH:
             jNode->minimum = std::stoi(node->children[0]->string_value);
             return;
-        }
-        else if (std::string(node->key).compare("maxLength") == 0)
-        {
+        case TokenType::MAX_LENGTH:
             jNode->maximum = std::stoi(node->children[0]->string_value);
             return;
-        }
-        else if (std::string(node->key).compare("minItems") == 0)
-        {
+        case TokenType::MIN_ITEMS:
             jNode->minimum = std::stoi(node->children[0]->string_value);
             return;
-        }
-        else if (std::string(node->key).compare("maxItems") == 0)
-        {
+        case TokenType::MAX_ITEMS:
             jNode->maximum = std::stoi(node->children[0]->string_value);
             return;
-        }
-        else if (std::string(node->key).compare("description") == 0) { return; }
-        else if (std::string(node->key).compare("docHint") == 0) { return; }
-        else if (std::string(node->key).compare("type") == 0) // TODO: Handle multiple types ex. "type": ["array", "null"]
-        {
+        case TokenType::DESCRIPTION:
+            return;
+        case TokenType::DOC_HINT:
+            return;
+        case TokenType::TYPE:
             handleType(node->children[0], jNode);
             return;
-        }
-        else if (std::string(node->key).compare("properties") == 0) { break; }
-        else if (std::string(node->key).compare("patternProperties") == 0) { break; }
-        else if (std::string(node->key).compare("additionalProperties") == 0) { return; }
-        else if (std::string(node->key).compare("$ref") == 0)
-        {
+        case TokenType::PROPERTIES:
+            break;
+        case TokenType::PATTERN_PROPERTIES:
+            break;
+        case TokenType::ADDITIONAL_PROPERTIES:
+            return;
+        case TokenType::REF:
             // Change parents name from items to whatever string_value is
             jNode->name = node->children[0]->string_value;
             placeholders.push_back(jNode);
-
             return;
-        }
-        else if (std::string(node->key).compare("if") == 0)
-        {
+        case TokenType::IF:
             return;
-        }
-        else if (std::string(node->key).compare("then") == 0)
-        {
+        case TokenType::THEN:
             return;
-        }
-        else if (std::string(node->key).compare("else") == 0)
-        {
+        case TokenType::ELSE:
             return;
+        case TokenType::NOT_A_KEYWORD:
+            break;
         }
-        // printf("Unknown keyword: %s\n", node->key);
-
-        //
 
         break;
     }

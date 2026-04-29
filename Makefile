@@ -6,7 +6,7 @@ CFLAGS = -I./ast/ -I./jst/
 	$(CC) -c -std=gnu11 -o $@ $< $(CFLAGS)
 
 %.o: %.cpp 
-	$(CPP) -c -std=c++17 -o $@ $< $(CFLAGS)
+	$(CPP) -c -std=c++20 -o $@ $< $(CFLAGS)
 
 all: jsonSchema
 
