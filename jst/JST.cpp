@@ -64,17 +64,11 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
     case AST_PAIR:
     {
         // TODO: need to manage what can be a variable name. Right now nothing can be named dependentRequired
-        if (std::string(node->key).compare("dependentRequired") == 0) { return; }
-        // This check allows keywords to also be property names. So "type", or "required" can be objects names.
-        if (node->child_count == 1 &&              // Make sure the child we're about to check is valid
-            node->children[0]->type == AST_OBJECT) // If the child is an object its not a property of the parent.
-        {
-            break;
-        }
 
         // Need to put these into a map and benchmark. This is probably pretty SLOW.
-        if (std::string(node->key).compare("$schema") == 0) { return; }
-        if (std::string(node->key).compare("$id") == 0) { return; }
+        if (std::string(node->key).compare("dependentRequired") == 0) { return; }
+        else if (std::string(node->key).compare("$schema") == 0) { return; }
+        else if (std::string(node->key).compare("$id") == 0) { return; }
         else if (std::string(node->key).compare("required") == 0) { return; }
         else if (std::string(node->key).compare("enum") == 0)
         {
@@ -142,6 +136,20 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
 
             return;
         }
+        else if (std::string(node->key).compare("if") == 0)
+        {
+            return;
+        }
+        else if (std::string(node->key).compare("then") == 0)
+        {
+            return;
+        }
+        else if (std::string(node->key).compare("else") == 0)
+        {
+            return;
+        }
+        // printf("Unknown keyword: %s\n", node->key);
+
         //
 
         break;
