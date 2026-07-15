@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstring>
 #include <fstream>  // std::ofstream
 #include <iostream> // std::iostream
@@ -30,6 +31,7 @@ generator::generator(ASTNode *node)
     // TODO: Only include when needed
     fs << "#include <cstdint>\n";
     fs << "#include <string>\n";
+    fs << "#include <optional>\n";
     fs << "#include <vector>\n";
     fs << "#include <variant>\n";
     fs << '\n';
@@ -154,16 +156,31 @@ void cpp::generator::handleVariants(std::string &structStr, JSTNode *node)
 
 void cpp::generator::handleEnums(std::string &structStr, JSTNode *node)
 {
-    auto type = node->children.at(0)->type;
-    for (auto iter = node->children.begin(); iter != node->children.end(); iter++)
+    std::vector<std::string> enumTypes;
+    for (const auto &child : node->children)
     {
-        if ((*iter)->type != type)
+        const auto typeName = toString(child->type, child->minimum, child->maximum);
+        if (std::find(enumTypes.begin(), enumTypes.end(), typeName) == enumTypes.end())
         {
-            // TODO: We still need to handle enum with multiple types
-            return;
+            enumTypes.push_back(typeName);
         }
     }
-    structStr += "\t" + toString(node->children.at(0)->type) + ' ' + node->name + "; // JSON Enum of one type. Check at runtime for valid values.\n";
+
+    if (enumTypes.size() == 1)
+    {
+        structStr += "\t" + enumTypes.front() + ' ' + node->name + "; // JSON Enum of one type. Check at runtime for valid values.\n";
+        return;
+    }
+
+    std::string variantStr = "using " + underscoreToCamelCase(node->name) + " = std::variant<";
+    for (size_t i = 0; i < enumTypes.size(); ++i)
+    {
+        if (i != 0) { variantStr += ", "; }
+        variantStr += enumTypes[i];
+    }
+    variantStr += ">;";
+    variantStrings.push_back(variantStr);
+    structStr += "\t" + underscoreToCamelCase(node->name) + ' ' + node->name + ";\n";
 }
 
 std::string cpp::generator::handleInts(const int64_t &min, const int64_t &max)
@@ -216,6 +233,8 @@ std::string cpp::generator::toString(const JsonType &type, const int64_t &min, c
         return "bool";
     case JsonType::ARRAY:
         return "std::vector";
+    case JsonType::NULLTYPE:
+        return "std::nullptr_t";
     }
     return "// Unknown";
 }
