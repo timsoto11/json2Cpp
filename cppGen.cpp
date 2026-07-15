@@ -132,23 +132,49 @@ std::string generator::printVectorObject(const JSTNode &node)
 
 void cpp::generator::handleVariants(std::string &structStr, JSTNode *node)
 {
-    std::string varStr = "using " + underscoreToCamelCase(node->name) + " = std::variant<";
-    int numberOfTypes = node->type.numberOfTypes();
-    int numberOfTypePrinted = 0;
+    std::vector<std::string> variantTypes;
 
-    for (int i = 0; i < 8; ++i)
+    if (node->children.empty() == false)
     {
-        uint8_t typeValue = (1u << i);
-        if (node->type & typeValue)
+        for (const auto &child : node->children)
         {
-            varStr += toString(JsonType(static_cast<JsonType::JSON_TYPES>(typeValue)),
-                               node->minimum,
-                               node->maximum);
-            numberOfTypePrinted++;
-            if (numberOfTypePrinted < numberOfTypes) { varStr += ", "; }
+            if (child->type == JsonType::ARRAY)
+            {
+                variantTypes.push_back("std::vector<" + printVectorObject(*child) + ">");
+            }
+            else if (child->type == JsonType::OBJECT)
+            {
+                variantTypes.push_back(underscoreToCamelCase(child->name));
+            }
+            else
+            {
+                variantTypes.push_back(toString(child->type, child->minimum, child->maximum));
+            }
+        }
+    }
+    else
+    {
+        int numberOfTypes = node->type.numberOfTypes();
+        for (int i = 0; i < 8; ++i)
+        {
+            uint8_t typeValue = (1u << i);
+            if (node->type & typeValue)
+            {
+                variantTypes.push_back(toString(JsonType(static_cast<JsonType::JSON_TYPES>(typeValue)),
+                                                node->minimum,
+                                                node->maximum));
+            }
         }
     }
 
+    variantTypes.erase(std::unique(variantTypes.begin(), variantTypes.end()), variantTypes.end());
+
+    std::string varStr = "using " + underscoreToCamelCase(node->name) + " = std::variant<";
+    for (size_t i = 0; i < variantTypes.size(); ++i)
+    {
+        if (i != 0) { varStr += ", "; }
+        varStr += variantTypes[i];
+    }
     varStr += ">;";
     variantStrings.push_back(varStr);
     structStr += "\t" + underscoreToCamelCase(node->name) + ' ' + node->name + ";\n";

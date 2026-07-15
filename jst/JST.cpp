@@ -78,6 +78,61 @@ static TokenType GetKeywordToken(std::string_view token)
     return it != keywords.end() ? it->second : TokenType::NOT_A_KEYWORD;
 }
 
+static void collectOneOfBranchTypes(ASTNode *schemaNode, JSTNode *jNode)
+{
+    if (schemaNode == nullptr) { return; }
+
+    if (schemaNode->type == AST_ARRAY)
+    {
+        for (int i = 0; i < schemaNode->child_count; ++i)
+        {
+            collectOneOfBranchTypes(schemaNode->children[i], jNode);
+        }
+        return;
+    }
+
+    for (int i = 0; i < schemaNode->child_count; ++i)
+    {
+        auto *child = schemaNode->children[i];
+        if (child->type != AST_PAIR) { continue; }
+
+        const TokenType token = GetKeywordToken(child->key);
+        switch (token)
+        {
+        case TokenType::TYPE:
+            if (child->children[0]->type == AST_STRING)
+            {
+                jNode->type += JsonType(child->children[0]->string_value);
+            }
+            else if (child->children[0]->type == AST_ARRAY)
+            {
+                for (int j = 0; j < child->children[0]->child_count; ++j)
+                {
+                    jNode->type += JsonType(child->children[0]->children[j]->string_value);
+                }
+            }
+            break;
+        case TokenType::ITEMS:
+            jNode->type += JsonType::ARRAY;
+            jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
+            {
+                auto &itemsChild = jNode->children.back();
+                itemsChild->name = "items";
+                collectOneOfBranchTypes(child->children[0], itemsChild.get());
+            }
+            break;
+        case TokenType::PROPERTIES:
+            jNode->type += JsonType::OBJECT;
+            break;
+        case TokenType::ADDITIONAL_PROPERTIES:
+            jNode->type += JsonType::OBJECT;
+            break;
+        default:
+            break;
+        }
+    }
+}
+
 std::unique_ptr<JSTNode> JstGenerator::generateJST(ASTNode *node)
 {
     auto root = std::make_unique<JSTNode>(nullptr);
@@ -148,7 +203,6 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
         case TokenType::REQUIRED:
             return;
         case TokenType::ENUM:
-            jNode->hasEnum = true;
             jNode->type = JsonType::ENUM;
             break;
         case TokenType::TITLE:
@@ -162,7 +216,19 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
         case TokenType::PATTERN:
             return;
         case TokenType::ONE_OF:
-            jNode->hasEnum = true;
+            jNode->type = JsonType::UNKNOWN;
+            if (node->child_count > 0 && node->children[0]->type == AST_ARRAY)
+            {
+                auto *branchArray = node->children[0];
+                for (int i = 0; i < branchArray->child_count; ++i)
+                {
+                    jNode->children.push_back({std::make_unique<JSTNode>(jNode)});
+                    auto &branch = jNode->children.back();
+                    branch->name = "oneOf" + std::to_string(i);
+                    collectOneOfBranchTypes(branchArray->children[i], branch.get());
+                    jNode->type += branch->type;
+                }
+            }
             return;
         case TokenType::MINIMUM:
             jNode->minimum = std::stoi(node->children[0]->string_value);

@@ -97,7 +97,6 @@ public:
     explicit JSTNode(JSTNode *p) : parent(p) {}
     JsonType type;
     std::string name;
-    bool hasEnum = false;
 
     JSTNode *parent = nullptr;
     std::vector<std::unique_ptr<JSTNode>> children;
