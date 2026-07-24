@@ -19,6 +19,7 @@ enum class TokenType
     COMMENT,
     ITEMS,
     PATTERN,
+    ALL_OF,
     ONE_OF,
     MINIMUM,
     MAXIMUM,
@@ -54,6 +55,7 @@ static TokenType GetKeywordToken(std::string_view token)
         {"items", TokenType::ITEMS},
         {"pattern", TokenType::PATTERN},
         {"oneOf", TokenType::ONE_OF},
+        {"allOf", TokenType::ALL_OF},
         {"minimum", TokenType::MINIMUM},
         {"maximum", TokenType::MAXIMUM},
         {"minLength", TokenType::MIN_LENGTH},
@@ -76,6 +78,58 @@ static TokenType GetKeywordToken(std::string_view token)
 
     auto it = keywords.find(token);
     return it != keywords.end() ? it->second : TokenType::NOT_A_KEYWORD;
+}
+
+static JsonType collectBranchType(ASTNode *schemaNode)
+{
+    JsonType result;
+    if (schemaNode == nullptr) { return result; }
+
+    if (schemaNode->type == AST_ARRAY)
+    {
+        for (int i = 0; i < schemaNode->child_count; ++i)
+        {
+            result += collectBranchType(schemaNode->children[i]);
+        }
+        return result;
+    }
+
+    for (int i = 0; i < schemaNode->child_count; ++i)
+    {
+        auto *child = schemaNode->children[i];
+        if (child->type != AST_PAIR) { continue; }
+
+        const TokenType token = GetKeywordToken(child->key);
+        switch (token)
+        {
+        case TokenType::TYPE:
+            if (child->children[0]->type == AST_STRING)
+            {
+                result += JsonType(child->children[0]->string_value);
+            }
+            else if (child->children[0]->type == AST_ARRAY)
+            {
+                for (int j = 0; j < child->children[0]->child_count; ++j)
+                {
+                    result += JsonType(child->children[0]->children[j]->string_value);
+                }
+            }
+            break;
+        case TokenType::ITEMS:
+            result += JsonType::ARRAY;
+            result += collectBranchType(child->children[0]);
+            break;
+        case TokenType::PROPERTIES:
+            result += JsonType::OBJECT;
+            break;
+        case TokenType::ADDITIONAL_PROPERTIES:
+            result += JsonType::OBJECT;
+            break;
+        default:
+            break;
+        }
+    }
+    return result;
 }
 
 static void collectOneOfBranchTypes(ASTNode *schemaNode, JSTNode *jNode)
@@ -215,6 +269,36 @@ void JstGenerator::generateJST(ASTNode *node, JSTNode *jNode)
             break;
         case TokenType::PATTERN:
             return;
+        case TokenType::ALL_OF:
+            jNode->type = JsonType::UNKNOWN;
+            if (node->child_count > 0 && node->children[0]->type == AST_ARRAY)
+            {
+                bool firstBranch = true;
+                JsonType resultType;
+
+                auto *branchArray = node->children[0];
+                for (int i = 0; i < branchArray->child_count; ++i)
+                {
+                    const JsonType branchType = collectBranchType(branchArray->children[i]);
+                    if (firstBranch)
+                    {
+                        resultType = branchType;
+                        firstBranch = false;
+                    }
+                    else
+                    {
+                        resultType = resultType & branchType;
+                    }
+                }
+
+                if (resultType.empty())
+                {
+                    std::cerr << "allOf contains incompatible branch types\n";
+                }
+                jNode->type = resultType;
+            }
+            return;
+
         case TokenType::ONE_OF:
             jNode->type = JsonType::UNKNOWN;
             if (node->child_count > 0 && node->children[0]->type == AST_ARRAY)

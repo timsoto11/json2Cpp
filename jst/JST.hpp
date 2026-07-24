@@ -67,6 +67,16 @@ public:
         return lhs;
     }
 
+    JsonType operator&(const JsonType &rhs) const
+    {
+        return JsonType(static_cast<JSON_TYPES>(value & rhs.value));
+    }
+
+    bool empty() const
+    {
+        return value == UNKNOWN;
+    }
+
     int numberOfTypes() const
     {
         return __builtin_popcount(value);
